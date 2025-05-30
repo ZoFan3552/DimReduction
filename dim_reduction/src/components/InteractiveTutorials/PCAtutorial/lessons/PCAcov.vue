@@ -62,15 +62,16 @@
                             <li>非对角线元素：X和Y之间的协方差</li>
                         </ul>
 
-                        <div v-if="eigenResults.length > 0" class="eigenvalue-section">
+                        <div v-if="eigenResults && eigenResults.length > 0" class="eigenvalue-section">
                             <p><strong>步骤3：计算特征值和特征向量</strong></p>
-                            <p>特征值：$\lambda_1 = {{ eigenResults[0].value.toFixed(4) }}$, $\lambda_2 = {{
-                                eigenResults[1].value.toFixed(4) }}$</p>
-                            <p>对应特征向量：</p>
-                            <p>$v_1 = [{{ eigenResults[0].vector[0].toFixed(4) }}, {{
-                                eigenResults[0].vector[1].toFixed(4) }}]^T$</p>
-                            <p>$v_2 = [{{ eigenResults[1].vector[0].toFixed(4) }}, {{
-                                eigenResults[1].vector[1].toFixed(4) }}]^T$</p>
+
+                            <div v-for="(result, index) in eigenResults" :key="index">
+                                <p>特征值：$\lambda${{ index + 1 }} = {{ result.value.toFixed(4) }}</p>
+                                <p>
+                                    对应特征向量：$v${{ index + 1 }} =
+                                    [{{ result.vector[0].toFixed(4) }}, {{ result.vector[1].toFixed(4) }}]^T
+                                </p>
+                            </div>
 
                             <p><strong>结论</strong>：这些特征向量就是主成分的方向，特征值表示沿着这些方向的方差大小。</p>
                         </div>
@@ -107,6 +108,41 @@ export default {
     name: 'CovarianceMatrix',
     components: {
         BaseSegment
+    },
+    props: {
+        savedAnswer: {
+            type: String,
+            default: null
+        }
+    },
+    watch: {
+        // 监听savedAnswer属性的变化
+        savedAnswer: {
+            immediate: true,
+            handler(newValue) {
+                console.log("协方差子组件接受回答", newValue);
+                if (newValue) {
+                    this.understandingAnswer = Number(newValue);
+                    //   this.hasSubmittedAnswer = true;
+                    //   this.feedback = '您之前已经完成了这个章节的练习。';
+                }
+            }
+        },
+        showResults(val) {
+            if (val) {
+                this.$nextTick(() => {
+                    this.typesetMath()
+                })
+            }
+        },
+        eigenResults: {
+            handler() {
+                this.$nextTick(() => {
+                    this.typesetMath()
+                })
+            },
+            deep: true
+        }
     },
     data() {
         return {
@@ -327,8 +363,12 @@ export default {
                 { value: lambda2, vector: [v2x, v2y] }
             ];
 
+
             // 按特征值降序排序
             this.eigenResults.sort((a, b) => b.value - a.value);
+            console.log("eigenResults", this.eigenResults);
+            console.log("eigenResults001", this.eigenResults[0].vector[0].toFixed(4));
+
         },
 
         createVisualization() {
@@ -466,6 +506,9 @@ export default {
             this.understandingAttempts++;
             const correctAnswer = 1; // 特征值越大，对应的特征向量就是越重要的主成分
 
+            // 向父组件发送答案提交事件
+            this.$emit('answer-submitted', this.understandingAnswer);
+
             if (this.understandingAnswer === correctAnswer) {
                 // 回答正确
                 this.$refs.baseSegment.showResponse(
@@ -512,23 +555,7 @@ export default {
             d3.select(this.$refs.dataVisualization).selectAll("*").remove();
         }
     },
-    watch: {
-        showResults(val) {
-            if (val) {
-                this.$nextTick(() => {
-                    this.typesetMath()
-                })
-            }
-        },
-        eigenResults: {
-            handler() {
-                this.$nextTick(() => {
-                    this.typesetMath()
-                })
-            },
-            deep: true
-        }
-    },
+
 }
 </script>
 

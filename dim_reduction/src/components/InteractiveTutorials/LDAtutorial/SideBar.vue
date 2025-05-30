@@ -3,11 +3,11 @@
     <div class="side-navigation">
         <div class="nav-header">
             <h3>教程目录</h3>
-            <div class="progress-info">
+            <!-- <div class="progress-info">
                 <el-progress type="circle" :percentage="completionPercentage" :width="80" :stroke-width="6"
                     :color="progressColors"></el-progress>
                 <p class="progress-text">完成: {{ completedCount }}/{{ sections.length }}</p>
-            </div>
+            </div> -->
         </div>
 
         <el-menu :default-active="activeSection" class="nav-menu" @select="handleSelect">

@@ -89,12 +89,12 @@ export default {
         if (mainContent) {
             mainContent.addEventListener('scroll', this.handleScroll);
         }
-
+        // localStorage.removeItem('umap-completed-sections');
         // 检查本地存储中是否有完成记录
-        const storedCompleted = localStorage.getItem('umap-completed-sections');
-        if (storedCompleted) {
-            this.completedSections = JSON.parse(storedCompleted);
-        }
+        // const storedCompleted = localStorage.getItem('umap-completed-sections');
+        // if (storedCompleted) {
+        //     this.completedSections = JSON.parse(storedCompleted);
+        // }
     },
     beforeDestroy() {
         // 移除el-main容器的滚动事件监听
@@ -177,7 +177,7 @@ export default {
             if (!this.completedSections.includes(sectionId)) {
                 this.completedSections.push(sectionId);
                 // 保存到本地存储
-                localStorage.setItem('umap-completed-sections', JSON.stringify(this.completedSections));
+                // localStorage.setItem('umap-completed-sections', JSON.stringify(this.completedSections));
             }
         }
     }

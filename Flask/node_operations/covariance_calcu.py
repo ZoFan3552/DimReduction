@@ -1,11 +1,10 @@
 # app.py
 import uuid
 
-from flask import Flask, request, jsonify, Blueprint
+from flask import request, jsonify, Blueprint
 import numpy as np
 import pandas as pd
 from uuid import uuid4
-from flask_cors import CORS
 
 covariance_api = Blueprint('covariance_api', __name__)
 
@@ -69,19 +68,6 @@ def calculate_covariance():
         new_node["computed"]["covariance_matrix"] = covariance_matrix
         new_node["computed"]["featureNames"] = numeric_columns
         new_node["children"] = []
-        # new_node["operation"] = "协方差矩阵"
-        # new_node = {
-        #     "id": generate_id(),
-        #     "operation": "协方差矩阵",
-        #     "parameters": {},
-        #     "target": node_data['target'],  # 目标是源节点
-        #     "dataset": node_data['dataset'],  # 保留原始数据集
-        #     "computed": {
-        #         "covariance_matrix": covariance_matrix,
-        #         "featureNames": numeric_columns
-        #     },
-        #     "children": []
-        # }
 
         return jsonify({
             'success': True,

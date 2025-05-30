@@ -56,8 +56,9 @@ import DatasetDisplay from '@/components/mainComponents/graphicsComponents/multi
 import FlowChart from '@/components/mainComponents/graphicsComponents/FlowChart.vue'
 import OperationBoard from "@/components/mainComponents/graphicsComponents/multipleDisplay/OperationBoard.vue";
 import NodeDetailDisplay from "@/components/mainComponents/graphicsComponents/multipleDisplay/NodeDetailDisplay.vue";
+import axios from '@/utils/myAxios.js'; // 导入axios用于HTTP请求
+
 export default {
-    // name: "App",
     components: {
         SplitPane,
         DatasetDisplay,
@@ -65,12 +66,26 @@ export default {
         OperationBoard,
         NodeDetailDisplay,
     },
+    props: {
+        // 接收从父组件传递的算法类型参数
+        algorithmType: {
+            type: String,
+            default: 'common',
+            validator: function (value) {
+                // 验证算法类型是否有效
+                return ['PCA', 'LDA', 'tSNE', 'UMAP', 'common'].includes(value);
+            }
+        }
+    },
     data() {
         return {
             nodeData: null,
             newNode: null,
-            treeData:
-            {
+            userId: null, // 用户ID
+            isSaving: false, // 防止多次保存操作的标志
+            saveTimeout: null, // 用于延迟保存操作的定时器
+            // 默认treeData
+            treeData: {
                 "id": "1",
                 "selected": false,
                 "operation": "原始数据集",
@@ -84,12 +99,102 @@ export default {
             },
         }
     },
+    watch: {
+        // 监听treeData的变化，当发生变化时自动保存
+        treeData: {
+            handler: function () {
+                this.saveTreeDataDebounced();
+            },
+            deep: true // 深度监听，检测嵌套对象的变化
+        }
+    },
+    created() {
+        // 从localStorage获取userId
+        this.userId = localStorage.getItem('userId');
 
+        // 根据用户登录状态加载树数据
+        this.loadTreeData();
+    },
     methods: {
 
+        // 加载树数据
+        loadTreeData() {
+            if (this.userId) {
+                // 用户已登录，从数据库加载
+                this.loadUserTreeData();
+            } else {
+                // 用户未登录，使用默认树数据
+                console.log('用户未登录，使用默认treeData');
+            }
+        },
 
+        // 从数据库加载用户的树数据
+        loadUserTreeData() {
+            axios.get(`/treeData/${this.userId}/${this.algorithmType}`)
+                .then(response => {
+                    if (response && response.treeData) {
+                        // 从响应中设置treeData
+                        this.$set(this, 'treeData', JSON.parse(response.treeData));
+                        console.log('从数据库加载用户treeData成功');
+                    } else {
+                        console.log('未找到保存的treeData，使用默认值');
+                    }
+                })
+                .catch(error => {
+                    console.error('加载treeData错误:', error);
+                });
+        },
+
+        // 延迟保存treeData，防止频繁保存
+        saveTreeDataDebounced() {
+            // 只有用户登录时才保存
+            if (!this.userId) {
+                console.log('用户未登录，treeData不保存');
+                return;
+            }
+
+            // 清除现有的定时器
+            if (this.saveTimeout) {
+                clearTimeout(this.saveTimeout);
+            }
+
+            // 设置新的定时器，1秒钟不活动后保存
+            this.saveTimeout = setTimeout(() => {
+                this.saveTreeData();
+            }, 1000);
+        },
+
+        // 保存treeData到数据库
+        saveTreeData() {
+            // 防止多次保存操作
+            if (this.isSaving) {
+                return;
+            }
+
+            this.isSaving = true;
+
+            const payload = {
+                userId: this.userId,
+                algorithmType: this.algorithmType,
+                treeData: JSON.stringify(this.treeData)
+            };
+
+            axios.post('/treeData/save', payload)
+                .then(response => {
+                    console.log("treeData保存回应", response);
+                    console.log('TreeData保存成功');
+                })
+                .catch(error => {
+                    console.error('保存treeData错误:', error);
+                })
+                .finally(() => {
+                    this.isSaving = false;
+                });
+        },
+
+        // 修改现有的nodeContextmenu方法
         nodeContextmenu({ option, node }) {
-            // 新增根节点删除拦截
+            // 原有代码保持不变
             if (option !== 'delete' || !node?.id || node.id === 'root') {
                 console.warn('根节点不可删除');
                 return;
@@ -98,11 +203,12 @@ export default {
             // 深拷贝避免污染原始数据
             const treeDataCopy = JSON.parse(JSON.stringify(this.treeData));
 
-            // 执行删除（此时 node 不可能是根节点）
+            // 执行删除
             const newTreeData = this.deleteNodeById(treeDataCopy, node.id);
 
             // 更新响应式数据
             this.$set(this, 'treeData', newTreeData);
+            // watcher会处理保存更新后的treeData
         },
 
         deleteNodeById(nodeOrNodes, targetId) {
@@ -167,11 +273,7 @@ export default {
         datasetImported(data) {
             console.log("接受到数据集进行导入", data)
             this.treeData = data;
-            // this.treeData.dataset = data.dataset;
-            // this.treeData.target = data.target;
-            // this.treeData.operation = data.operation;
             //重新处理树
-
         },
 
         applyMatrix(data) {
@@ -194,26 +296,6 @@ export default {
         },
 
         gradientUpdated(data) {
-
-            // const newNode = {
-            //     "id": this.generateId(),
-            //     "selected": false,
-            //     "operation": "梯度下降",
-            //     // "nodeType": "common",
-            //     "parameters": {
-            //         method: data.algorithm,
-
-            //     },
-            //     "target": this.nodeData.target,
-            //     "dataset": data.coordinates,
-            //     "computed": {},
-            //     "children": []
-            // }
-
-            // // 检查并复制 highDimSimilarity
-            // if (this.nodeData.computed && this.nodeData.computed.highDimSimilarity) {
-            //     newNode.computed.highDimSimilarity = this.nodeData.computed.highDimSimilarity;
-            // }
 
             this.addNewNodeToTree(this.nodeData, data);
         },

@@ -89,6 +89,26 @@ export default {
     components: {
         BaseSegment
     },
+    props: {
+        savedAnswer: {
+            type: String,
+            default: null
+        }
+    },
+    watch: {
+        // 监听savedAnswer属性的变化
+        savedAnswer: {
+            immediate: true,
+            handler(newValue) {
+                console.log("选中主成分子组件接受回答", newValue);
+                if (newValue) {
+                    this.selectedAnswer = Number(newValue);
+                    //   this.hasSubmittedAnswer = true;
+                    //   this.feedback = '您之前已经完成了这个章节的练习。';
+                }
+            }
+        }
+    },
     data() {
         return {
             title: '5. 选择主成分',
@@ -502,7 +522,8 @@ export default {
         checkAnswer() {
             this.attempts++;
             const correctAnswer = 2; // 正确答案：根据具体数据集特征和应用需求...
-
+            // 向父组件发送答案提交事件
+            this.$emit('answer-submitted', this.selectedAnswer);
             if (this.selectedAnswer === correctAnswer) {
                 // 回答正确
                 this.$refs.baseSegment.showResponse(

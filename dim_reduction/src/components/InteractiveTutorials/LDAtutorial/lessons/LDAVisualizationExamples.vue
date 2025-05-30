@@ -21,9 +21,9 @@
                 <i class="el-icon-data-line"></i> 互动练习：LDA降维可视化
             </h3>
 
-            <p class="interaction-description">
+            <!-- <p class="interaction-description">
                 使用下面的交互式工具，探索LDA降维的效果以及各参数对于降维结果的影响。
-            </p>
+            </p> -->
 
             <!-- <div class="visualization-container">
                 <div class="control-panel">
@@ -182,6 +182,18 @@ export default {
         totalSections: {
             type: Number,
             required: true
+        },
+        userAnswers: {
+            default: null
+        }
+    },
+    watch: {
+        // 当从父组件收到新的用户答案时更新本地状态
+        userAnswers(newVal) {
+            if (newVal) {
+                this.quizAnswers = JSON.parse(newVal);
+            }
+
         }
     },
     data() {
@@ -226,7 +238,6 @@ export default {
   
   通过可视化对比，我们通常可以观察到LDA在类别分离方面的优势，尤其是当类内变异小而类间差异大时。
   
-  在下面的互动练习中，你可以通过调整参数，探索LDA在不同数据集上的表现，并将其与PCA进行对比。
         `,
             isCompleted: false,
 
@@ -792,6 +803,9 @@ export default {
 
         checkAnswers() {
             this.quizChecked = true;
+
+            // 发送答案给父组件保存
+            this.$emit('save-answer', JSON.stringify(this.quizAnswers));
 
             // 检查答案是否全部正确
             const allCorrect = this.quizAnswers.every((answer, index) => answer === this.correctAnswers[index]);

@@ -16,7 +16,7 @@
         </div>
 
         <!-- 互动区域 - 直接集成在组件中 -->
-        <div v-if="!isCompleted" class="interaction-area">
+        <div class="interaction-area">
             <h3 class="interaction-title">
                 <i class="el-icon-s-opportunity"></i> 互动练习：理解LDA的基本概念
             </h3>
@@ -104,6 +104,9 @@ export default {
         totalSections: {
             type: Number,
             required: true
+        },
+        userAnswers: {
+            default: null
         }
     },
     data() {
@@ -179,6 +182,15 @@ export default {
             hintShown: false
         }
     },
+    watch: {
+        // 当从父组件收到新的用户答案时更新本地状态
+        userAnswers(newVal) {
+            if (newVal) {
+                this.selectedOption = Number(newVal);
+            }
+
+        }
+    },
     computed: {
         compiledMarkdown() {
             const withMath = renderMath(this.markdownContent);
@@ -203,6 +215,9 @@ export default {
     methods: {
         checkAnswer() {
             if (this.selectedOption === null) return;
+
+            // 发送答案给父组件保存
+            this.$emit('save-answer', this.selectedOption);
 
             this.answered = true;
             this.isCorrect = this.selectedOption === this.correctOption;

@@ -5,10 +5,10 @@
         <!-- 互动部分 -->
         <template v-slot:interaction>
             <div class="limitations-interactive">
-                <h3>PCA局限性探索</h3>
-                <p>通过交互式演示，体验PCA在不同数据情境下的局限性。</p>
+                <!-- <h3>PCA局限性探索</h3>
+                <p>通过交互式演示，体验PCA在不同数据情境下的局限性。</p> -->
 
-                <div class="demo-controls">
+                <!-- <div class="demo-controls">
                     <h4>选择数据场景</h4>
                     <el-radio-group v-model="selectedScenario" @change="updateScenario">
                         <el-radio :label="'nonlinear'">非线性数据</el-radio>
@@ -81,7 +81,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
                 <div class="match-exercise">
                     <h4>匹配练习：PCA局限性与解决方案</h4>
@@ -137,6 +137,26 @@ export default {
     name: 'PCALimitations',
     components: {
         BaseSegment
+    },
+    props: {
+        savedAnswer: {
+            type: String,
+            default: null
+        }
+    },
+    watch: {
+        // 监听savedAnswer属性的变化
+        savedAnswer: {
+            immediate: true,
+            handler(newValue) {
+                console.log("局限性子组件接受回答", newValue);
+                if (newValue) {
+                    this.userMatches = JSON.parse(newValue);
+                    //   this.hasSubmittedAnswer = true;
+                    //   this.feedback = '您之前已经完成了这个章节的练习。';
+                }
+            }
+        }
     },
     data() {
         return {
@@ -194,7 +214,6 @@ export default {
   
   4. **监督PCA**：将目标变量信息纳入降维过程
   
-  在下面的互动环节中，我们将探索一些PCA的局限性场景，并了解如何选择合适的替代方法。
         `,
             // 场景控制
             selectedScenario: 'nonlinear',
@@ -826,6 +845,9 @@ export default {
 
             // 检查用户匹配是否正确
             let correct = true;
+
+            // 向父组件发送答案提交事件
+            this.$emit('answer-submitted', JSON.stringify(this.userMatches));
 
             if (this.userMatches.length !== this.correctMatches.length) {
                 correct = false;

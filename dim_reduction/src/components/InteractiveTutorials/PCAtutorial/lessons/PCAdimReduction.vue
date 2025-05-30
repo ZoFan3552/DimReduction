@@ -38,28 +38,23 @@
                     </template>
                 </div>
 
-                <div v-if="currentStep === demoSteps.length" class="understanding-check">
+                <div class="understanding-check">
                     <h4>理解检查</h4>
-                    <p>根据演示，请将PCA降维的步骤按正确顺序排列：</p>
+                    <p>根据演示，请将PCA降维的步骤按正确顺序排列（可拖动排序）：</p>
 
-                    <div class="sortable-container">
-                        <el-card v-for="(item, index) in userSortedSteps" :key="index" class="sort-item">
-                            <div class="step-content">
-                                <span class="step-number">{{ index + 1 }}</span>
-                                <span>{{ item.text }}</span>
+                    <draggable v-model="userSortedSteps" :options="{ animation: 200 }" :item-key="'id'"
+                        class="sortable-container" ghost-class="ghost-item">
+                        <transition-group>
+                            <div v-for="(step, index) in userSortedSteps" :key="step.id" class="sort-item">
+                                <el-card class="draggable-item">
+                                    <div class="step-content">
+                                        <span class="step-number-drag"> {{ index + 1 }}</span>
+                                        <span>{{ step.text }}</span>
+                                    </div>
+                                </el-card>
                             </div>
-                            <div class="step-controls">
-                                <el-button type="text" icon="el-icon-arrow-up" @click="moveStep(index, -1)"
-                                    :disabled="index === 0">
-                                    上移
-                                </el-button>
-                                <el-button type="text" icon="el-icon-arrow-down" @click="moveStep(index, 1)"
-                                    :disabled="index === userSortedSteps.length - 1">
-                                    下移
-                                </el-button>
-                            </div>
-                        </el-card>
-                    </div>
+                        </transition-group>
+                    </draggable>
 
                     <el-button type="primary" @click="checkStepOrder" class="check-order-button">
                         检查顺序
@@ -73,13 +68,23 @@
 <script>
 import BaseSegment from './BaseSegment.vue'
 import * as d3 from 'd3'
+import draggable from 'vuedraggable'; // 导入 draggable
 // import * as math from 'mathjs'
 
 export default {
     name: 'DimensionalityReduction',
     components: {
-        BaseSegment
+        BaseSegment,
+        draggable, // 注册 draggable 组件
     },
+    props: {
+        // 从父组件接收之前保存的排序结果
+        savedAnswer: {
+            type: String,
+            default: null
+        }
+    },
+
     data() {
         return {
             title: '6. 降维过程',
@@ -210,13 +215,12 @@ export default {
             projectedData: [],
 
             // 排序题
-            correctStepOrder: [
-                { text: "对原始数据进行中心化处理" },
-                { text: "计算中心化数据的协方差矩阵" },
-                { text: "对协方差矩阵进行特征值分解" },
-                { text: "将特征值和特征向量按降序排列" },
-                { text: "选择前k个主成分作为投影矩阵" },
-                { text: "将原始数据投影到新的低维空间" }
+            correctStepOrder: [ // 正确的步骤顺序，每个item最好有一个唯一ID
+                { id: 1, text: "数据标准化" },
+                { id: 2, text: "计算协方差矩阵" },
+                { id: 3, text: "计算特征值和特征向量" },
+                { id: 4, text: "选择主成分" },
+                { id: 5, text: "转换数据到新的子空间" }
             ],
             userSortedSteps: [],
             orderAttempts: 0
@@ -880,63 +884,51 @@ export default {
         },
 
         initSortingQuestion() {
-            // 初始化排序题的步骤，随机打乱顺序
-            this.userSortedSteps = [...this.correctStepOrder]
-                .map(a => ({ ...a }))
-                .sort(() => Math.random() - 0.5);
-        },
-
-        moveStep(index, direction) {
-            // 交换元素位置
-            if (
-                (direction === -1 && index > 0) ||
-                (direction === 1 && index < this.userSortedSteps.length - 1)
-            ) {
-                const temp = this.userSortedSteps[index];
-                this.$set(this.userSortedSteps, index, this.userSortedSteps[index + direction]);
-                this.$set(this.userSortedSteps, index + direction, temp);
+            if (this.savedAnswer) {
+                try {
+                    const parsed = JSON.parse(this.savedAnswer);
+                    if (Array.isArray(parsed) && parsed.every(item => item.id && item.text)) {
+                        this.userSortedSteps = parsed;
+                        return;
+                    }
+                } catch (err) {
+                    console.warn('无法解析 savedAnswer，使用默认顺序。', err);
+                }
             }
+
+            this.userSortedSteps = [...this.correctStepOrder]
+                .map(step => ({ ...step }))
+                .sort(() => Math.random() - 0.5);
         },
 
         checkStepOrder() {
             this.orderAttempts++;
 
-            // 检查用户排序是否正确
-            let isCorrect = true;
-            for (let i = 0; i < this.correctStepOrder.length; i++) {
-                if (this.userSortedSteps[i].text !== this.correctStepOrder[i].text) {
-                    isCorrect = false;
-                    break;
-                }
-            }
+            const isCorrect = this.userSortedSteps.every(
+                (step, index) => step.id === this.correctStepOrder[index].id
+            );
+
+            // ✅ 向父组件发送排序答案
+            this.$emit('answer-submitted', JSON.stringify(this.userSortedSteps));
 
             if (isCorrect) {
-                // 回答正确
-                this.$refs.baseSegment.showResponse(
-                    "步骤顺序正确！",
-                    "您已正确排列了PCA降维的完整计算步骤。这些步骤构成了PCA算法的核心流程：从数据预处理到最终降维。",
-                    "success"
-                );
-
+                this.$message.success('步骤顺序正确！');
                 // 标记本节完成
                 setTimeout(() => {
-                    this.$refs.baseSegment.completeSegment();
+                    if (this.$refs.baseSegment && typeof this.$refs.baseSegment.completeSegment === 'function') {
+                        this.$refs.baseSegment.completeSegment();
+                    } else {
+                        console.log("baseSegment ref not found or completeSegment is not a function");
+                        this.onCompleted(); // 直接调用 onCompleted 作为后备
+                    }
                 }, 200);
             } else {
-                // 回答错误
-                let hint = "";
-                if (this.orderAttempts >= 2) {
-                    hint = "提示：回顾演示中的各个步骤。PCA的第一步是对数据进行什么处理？之后如何计算数据分布特性？";
-                }
-
-                this.$refs.baseSegment.showResponse(
-                    "步骤顺序不正确",
-                    `请仔细思考PCA降维的流程，重新排列步骤。${hint}`,
-                    "error"
-                );
+                const hint = this.orderAttempts >= 2
+                    ? '提示：PCA第一步通常是对数据做什么处理？'
+                    : '';
+                this.$message.error(`顺序不正确，请重试。${hint}`);
             }
         },
-
         onCompleted() {
             // 通知父组件此片段已完成
             this.$emit('completed', this.segmentId);

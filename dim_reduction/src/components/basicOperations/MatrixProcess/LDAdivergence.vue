@@ -19,16 +19,7 @@
                         <el-card class="formula-card">
                             <div class="formula-header">类内散度矩阵 (Within-Class Scatter Matrix)</div>
                             <div class="formula" ref="withinClassFormula"></div>
-                            <!-- <div class="formula-description" ref="mathContainer">
-                                <p>类内散度矩阵表示每个类内的样本散布情况，它是各个类内散度矩阵的和。其中：</p>
-                                <ul>
-                                    <li>\(S_W\) 是类内散度矩阵</li>
-                                    <li>\(S_i\) 是第i个类的散度矩阵</li>
-                                    <li>\(x\) 是样本向量</li>
-                                    <li>\(\mu_i\) 是第i个类的均值向量</li>
-                                    <li>\(c\) 是类别总数</li>
-                                </ul>
-                            </div> -->
+
                             <div class="formula-description" v-html="renderedHtml1"></div>
                         </el-card>
 
@@ -53,16 +44,7 @@
                         <el-card class="formula-card">
                             <div class="formula-header">类间散度矩阵 (Between-Class Scatter Matrix)</div>
                             <div class="formula" ref="betweenClassFormula"></div>
-                            <!-- <div class="formula-description">
-                                <p>类间散度矩阵表示各个类别之间的分散程度，它是各个类的均值与总体均值之差的加权和。其中：</p>
-                                <ul>
-                                    <li>\(S_B\) 是类间散度矩阵</li>
-                                    <li>\(n_i\) 是第i个类的样本数</li>
-                                    <li>\(\mu_i\) 是第i个类的均值向量</li>
-                                    <li>\(\mu\) 是所有样本的均值向量</li>
-                                    <li>\(c\) 是类别总数</li>
-                                </ul>
-                            </div> -->
+
                             <div class="formula-description" v-html="renderedHtml2"></div>
                         </el-card>
 
@@ -145,7 +127,7 @@
 <script>
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
-import axios from 'axios';
+import axios from '@/utils/flaskAxios';
 
 export default {
     name: 'LDAMatrixCalculator',
@@ -283,9 +265,9 @@ export default {
             };
 
             // 发送请求到后端
-            axios.post('http://localhost:5000/api/calculate-lda-matrix', requestData)
+            axios.post('/api/calculate-lda-matrix', requestData)
                 .then(response => {
-                    const newNode = response.data;
+                    const newNode = response;
 
                     // 更新计算结果
                     if (type === 'within') {
@@ -312,7 +294,7 @@ export default {
                 })
                 .catch(error => {
                     console.error('计算出错:', error);
-                    this.$message.error('计算失败: ' + (error.response?.data?.message || error.message));
+                    this.$message.error('计算失败: ' + (error.response?.message || error.message));
                 })
                 .finally(() => {
                     this.calculating = false;

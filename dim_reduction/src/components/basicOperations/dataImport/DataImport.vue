@@ -30,24 +30,6 @@
                         </el-card>
                     </div>
                 </el-tab-pane>
-
-                <el-tab-pane label="上传数据集" name="upload">
-                    <!-- 用户数据集上传区域 -->
-                    <el-upload class="upload-area" drag action="#" :http-request="handleUpload" :show-file-list="false"
-                        :multiple="false" accept=".csv,.xlsx,.xls">
-                        <i class="el-icon-upload"></i>
-                        <div class="el-upload__text">拖拽文件到此处或 <em>点击上传</em></div>
-                        <div class="el-upload__tip" slot="tip">支持 CSV 或 Excel 文件，数据最后一列将被视为目标分类</div>
-                    </el-upload>
-
-                    <div v-if="uploadedFile" class="uploaded-file-info">
-                        <el-alert title="文件已上传" type="success" :description="uploadedFile.name" show-icon
-                            :closable="false">
-                            <el-button size="mini" type="primary" slot="title"
-                                @click="importUploadedDataset">导入该数据集</el-button>
-                        </el-alert>
-                    </div>
-                </el-tab-pane>
             </el-tabs>
         </el-card>
 
@@ -144,24 +126,7 @@ export default {
                     classes: 2,
                     icon: 'el-icon-first-aid-kit'
                 },
-                {
-                    id: 'digits',
-                    name: '手写数字数据集 (Digits)',
-                    description: '包含1797个8x8像素的手写数字图像，每个像素值表示灰度',
-                    samples: 1797,
-                    features: 64,
-                    classes: 10,
-                    icon: 'el-icon-notebook-2'
-                },
-                {
-                    id: 'boston',
-                    name: '波士顿房价数据集 (Boston)',
-                    description: '包含波士顿不同地区的房价和影响因素',
-                    samples: 506,
-                    features: 13,
-                    classes: 1,
-                    icon: 'el-icon-house'
-                },
+
                 {
                     id: 'mnist_small',
                     name: 'MNIST手写数字(小样本)',
@@ -170,7 +135,7 @@ export default {
                     features: 784,
                     classes: 10,
                     icon: 'el-icon-edit'
-                }
+                },
             ],
             previewVisible: false,
             loadingVisible: false,
@@ -202,10 +167,7 @@ export default {
                 }
             }, 200);
 
-            // axios.get(`/api/dataset`)
-            //     .then(response => {
-            //         console.log("数据集测试", response);
-            //     });
+
 
             // 获取数据集预览
             axios.get(`/api/dataset/${this.selectedDataset}/preview`)

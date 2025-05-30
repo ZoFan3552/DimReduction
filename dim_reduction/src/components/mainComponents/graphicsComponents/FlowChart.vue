@@ -8,7 +8,7 @@
                 <!-- <li @click="onContextMenuOption('loop')">创建循环</li>
                 <li @click="onContextMenuOption('mark')">标记节点</li> -->
                 <li @click="onContextMenuOption('delete')">删除节点</li>
-                <li @click="onContextMenuOption('collapse')">折叠/展开节点</li>
+                <!-- <li @click="onContextMenuOption('collapse')">折叠/展开节点</li> -->
             </ul>
         </div>
     </div>

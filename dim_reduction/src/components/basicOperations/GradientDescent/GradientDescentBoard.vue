@@ -187,7 +187,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from '@/utils/flaskAxios';
 import * as echarts from 'echarts';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
@@ -396,15 +396,15 @@ export default {
                 };
 
                 // Call the backend API
-                const response = await axios.post('http://localhost:5000/api/gradient_descent', requestData);
+                const response = await axios.post('/api/gradient_descent', requestData);
 
                 // Handle the response
-                if (response.data && response.data.success) {
-                    this.iterationData = response.data.iterations || [];
+                if (response && response.success) {
+                    this.iterationData = response.iterations || [];
                     this.iterationSlider = this.iterationData.length - 1;
 
                     // Emit the updated node data to parent component
-                    this.$emit('gradient-updated', response.data.node);
+                    this.$emit('gradient-updated', response.node);
 
                     // Update visualization
                     this.$nextTick(() => {
@@ -413,11 +413,11 @@ export default {
 
                     this.$message.success('梯度下降计算完成');
                 } else {
-                    this.$message.error(response.data.message || '计算失败');
+                    this.$message.error(response.message || '计算失败');
                 }
             } catch (error) {
                 console.error('Gradient descent error:', error);
-                this.$message.error('计算过程中发生错误');
+                this.$message.error(error);
             } finally {
                 this.isLoading = false;
             }

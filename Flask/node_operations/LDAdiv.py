@@ -1,10 +1,6 @@
 from flask import Flask, request, jsonify, Blueprint
 import numpy as np
 from sklearn.decomposition import PCA
-
-
-
-
 from flask import Flask, request, jsonify
 import numpy as np
 import uuid
@@ -198,24 +194,6 @@ def calculate_lda_matrix():
         new_node["computed"][result_key] = matrix
         new_node["computed"][stats_key] = stats
         new_node["children"] = []
-        # new_node = {
-        #     "id": str(uuid.uuid4()),
-        #     "selected": False,
-        #     "operation": "LDA矩阵计算",
-        #     "parameters": {
-        #         "matrixType": matrix_type,
-        #         "parameters": parameters
-        #     },
-        #     "target_names": node_data.get('target_names', []),
-        #     "target": node_data.get('target', []),
-        #     "feature_names": node_data.get('feature_names', []),
-        #     "dataset": node_data.get('dataset', []),
-        #     "computed": {
-        #         result_key: matrix,
-        #         stats_key: stats
-        #     },
-        #     "children": []
-        # }
 
         return jsonify(new_node)
 

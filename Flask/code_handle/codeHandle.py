@@ -1,7 +1,4 @@
-# app.py
-from flask import Flask, request, jsonify, Blueprint
-from flask_cors import CORS
-import sys
+from flask import request, jsonify, Blueprint
 import io
 import traceback
 import contextlib
@@ -17,7 +14,6 @@ import base64
 from io import BytesIO
 import numpy as np
 import pandas as pd
-from sklearn import datasets, preprocessing, decomposition, manifold
 import scipy
 import json
 

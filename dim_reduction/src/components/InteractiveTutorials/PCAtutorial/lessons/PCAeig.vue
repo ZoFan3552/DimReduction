@@ -93,6 +93,26 @@ export default {
     components: {
         BaseSegment
     },
+    props: {
+        savedAnswer: {
+            type: String,
+            default: null
+        }
+    },
+    watch: {
+        // 监听savedAnswer属性的变化
+        savedAnswer: {
+            immediate: true,
+            handler(newValue) {
+                console.log("特征值特征向量子组件接受回答", newValue);
+                if (newValue) {
+                    this.checkedUnderstandings = JSON.parse(newValue);
+                    //   this.hasSubmittedAnswer = true;
+                    //   this.feedback = '您之前已经完成了这个章节的练习。';
+                }
+            }
+        }
+    },
     data() {
         return {
             title: '4. 特征向量与特征值',
@@ -456,6 +476,9 @@ export default {
             // 正确答案是选项1和2
             const correctAnswers = [1, 2];
             const userAnswers = this.checkedUnderstandings.sort();
+
+            // 向父组件发送答案提交事件
+            this.$emit('answer-submitted', JSON.stringify(userAnswers));
 
             // 检查答案是否相同
             let isCorrect = correctAnswers.length === userAnswers.length;

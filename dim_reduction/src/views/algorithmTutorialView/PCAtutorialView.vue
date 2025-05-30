@@ -22,7 +22,7 @@
         <!-- 内容区域 - 添加固定高度和溢出滚动 -->
         <div class="experiment-content">
             <keep-alive>
-                <component :is="currentComponent" @step-completed="nextStep"></component>
+                <component :is="currentComponent" @step-completed="nextStep" tutorialType="PCA" algorithmType="PCA"></component>
             </keep-alive>
         </div>
 

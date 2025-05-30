@@ -187,7 +187,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from '@/utils/flaskAxios';
 
 export default {
     name: 'SimpleDataPreprocessing',
@@ -266,12 +266,12 @@ export default {
             };
 
             // 发送预处理请求到Flask后端
-            axios.post('http://localhost:5000/api/preprocess', requestData)
+            axios.post('/api/preprocess', requestData)
                 .then(response => {
                     console.log("预处理返回的结果", response);
-                    if (response.data && response.data.success) {
+                    if (response && response.success) {
                         // 处理成功
-                        const newNodeData = response.data.node;
+                        const newNodeData = response.node;
 
                         // 更新处理结果信息
                         this.lastProcessedResult = {
@@ -293,7 +293,7 @@ export default {
                         });
                     } else {
                         // 处理失败
-                        this.processingError = response.data.error || '预处理失败，请检查数据和选项';
+                        this.processingError = response.error || '预处理失败，请检查数据和选项';
 
                         this.$message({
                             message: this.processingError,

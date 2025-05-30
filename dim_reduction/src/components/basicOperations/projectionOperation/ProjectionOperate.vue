@@ -1,10 +1,5 @@
 <template>
     <div class="projection-component">
-        <!-- 标题栏 -->
-        <div class="header">
-            <i class="el-icon-s-data"></i>
-            <span>数据投影设置</span>
-        </div>
 
         <!-- 无数据提示 -->
         <div v-if="!nodeData" class="no-data">
@@ -148,7 +143,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from '@/utils/flaskAxios';
 export default {
     name: 'ProjectionComponent',
     props: {
@@ -407,13 +402,13 @@ export default {
                 }
 
                 // 调用后端API
-                const response = await axios.post('http://localhost:5000/api/projection', requestData);
+                const response = await axios.post('/api/projection', requestData);
 
-                if (response.data.success) {
+                if (response.success) {
                     this.$message.success('投影成功')
-                    this.$emit('projection-complete', response.data.node)
+                    this.$emit('projection-complete', response.node)
                 } else {
-                    this.$message.error(response.data.message || '投影失败')
+                    this.$message.error(response.message || '投影失败')
                 }
             } catch (error) {
                 console.error('投影失败:', error)
@@ -598,6 +593,4 @@ export default {
 .el-button {
     margin: 0 10px;
 }
-
-
 </style>

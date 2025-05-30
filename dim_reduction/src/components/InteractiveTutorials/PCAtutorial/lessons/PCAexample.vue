@@ -1,6 +1,6 @@
 <template>
     <base-segment ref="baseSegment" :title="title" :content="content" :segment-id="segmentId"
-        @segment-completed="onCompleted">
+        @segment-completed="onCompleted" :isLastSegment="true">
 
         <!-- 互动部分 -->
         <template v-slot:interaction>
@@ -32,7 +32,7 @@
                     </el-steps>
 
                     <div class="step-content">
-                        <div v-if="currentStep === 0" class="step-data-exploration">
+                        <div v-show="currentStep === 0" class="step-data-exploration">
                             <h5>步骤1: 数据探索</h5>
                             <p>首先，我们需要了解数据的基本特性和分布。</p>
 
@@ -50,7 +50,8 @@
 
                                 <div class="correlation-matrix">
                                     <h6>特征相关性矩阵</h6>
-                                    <div class="correlation-heatmap" ref="correlationHeatmap"></div>
+                                    <div class="correlation-heatmap" ref="correlationHeatmap">
+                                    </div>
                                 </div>
                             </div>
 
@@ -62,7 +63,7 @@
                             </div>
                         </div>
 
-                        <div v-if="currentStep === 1" class="step-data-preprocessing">
+                        <div v-show="currentStep === 1" class="step-data-preprocessing">
                             <h5>步骤2: 数据预处理</h5>
                             <p>在应用PCA之前，需要对数据进行标准化处理，使各特征具有相同的尺度。</p>
 
@@ -71,8 +72,9 @@
 
                                 <div class="preprocessing-explanation">
                                     <h6>标准化过程</h6>
-                                    <p>标准化公式：$z = \frac{x - \mu}{\sigma}$</p>
-                                    <p>其中，$\mu$ 是特征的平均值，$\sigma$ 是特征的标准差。</p>
+                                    <p>标准化公式：<math-formula expression="z = \frac{x - \mu}{\sigma}" /></p>
+                                    <p>其中，<math-formula expression="\mu" /> 是特征的平均值，<math-formula expression="\sigma" />
+                                        是特征的标准差。</p>
 
                                     <div class="standardized-stats">
                                         <h6>标准化后的统计量</h6>
@@ -88,7 +90,7 @@
                             </div>
                         </div>
 
-                        <div v-if="currentStep === 2" class="step-pca-computation">
+                        <div v-show="currentStep === 2" class="step-pca-computation">
                             <h5>步骤3: PCA计算</h5>
                             <p>计算协方差矩阵，并求解其特征值和特征向量。</p>
 
@@ -122,7 +124,7 @@
                             </div>
                         </div>
 
-                        <div v-if="currentStep === 3" class="step-component-selection">
+                        <div v-show="currentStep === 3" class="step-component-selection">
                             <h5>步骤4: 选择主成分</h5>
                             <p>根据特征值的方差贡献率，确定保留多少主成分。</p>
 
@@ -158,7 +160,7 @@
                             </div>
                         </div>
 
-                        <div v-if="currentStep === 4" class="step-data-projection">
+                        <div v-show="currentStep === 4" class="step-data-projection">
                             <h5>步骤5: 数据投影</h5>
                             <p>将原始数据投影到选定的主成分上。</p>
 
@@ -181,7 +183,7 @@
                             </div>
                         </div>
 
-                        <div v-if="currentStep === 5" class="step-interpretation">
+                        <div v-show="currentStep === 5" class="step-interpretation">
                             <h5>步骤6: 结果解释与应用</h5>
                             <p>解释主成分的含义，并探讨降维结果的应用。</p>
 
@@ -258,11 +260,33 @@
 <script>
 import BaseSegment from './BaseSegment.vue';
 import * as d3 from 'd3';
+import MathFormula from '@/utils/MathFormula.vue';
 
 export default {
     name: 'PracticalExample',
     components: {
-        BaseSegment
+        BaseSegment,
+        MathFormula
+    },
+    props: {
+        savedAnswer: {
+            type: String,
+            default: null
+        }
+    },
+    watch: {
+        // 监听savedAnswer属性的变化
+        savedAnswer: {
+            immediate: true,
+            handler(newValue) {
+                console.log("intro子组件接受回答", newValue);
+                if (newValue) {
+                    this.quizAnswer = Number(newValue);
+                    //   this.hasSubmittedAnswer = true;
+                    //   this.feedback = '您之前已经完成了这个章节的练习。';
+                }
+            }
+        }
     },
     data() {
         return {
@@ -664,7 +688,7 @@ export default {
             d3.select(this.$refs.preprocessingViz).selectAll("*").remove();
 
             // 设置尺寸和边距
-            const width = 500;
+            const width = 700;
             const height = 300;
             const margin = { top: 40, right: 120, bottom: 60, left: 60 };
 
@@ -1452,6 +1476,8 @@ export default {
 
             // 正确答案是选项2
             const correctAnswer = 2;
+            // 向父组件发送答案提交事件
+            this.$emit('answer-submitted', this.quizAnswer);
 
             if (this.quizAnswer === correctAnswer) {
                 // 回答正确

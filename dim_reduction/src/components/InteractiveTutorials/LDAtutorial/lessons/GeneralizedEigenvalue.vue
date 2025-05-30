@@ -16,7 +16,7 @@
         </div>
 
         <!-- 互动区域 - 广义特征值问题可视化与理解 -->
-        <div v-if="!isCompleted" class="interaction-area">
+        <div class="interaction-area">
             <h3 class="interaction-title">
                 <i class="el-icon-data-analysis"></i> 互动练习：广义特征值问题理解
             </h3>
@@ -30,13 +30,16 @@
 
                 <div class="quiz-item">
                     <p>
-                        LDA的优化目标是寻找投影方向 $w$，使得投影后类间距离最大，类内距离最小，可以表示为最大化比率：
+                        LDA的优化目标是寻找投影方向<math-formula expression="w" />，使得投影后类间距离最大，类内距离最小，可以表示为最大化比率：
                     </p>
                     <div class="formula-container">
-                        $J(w) = $
-                        <el-select v-model="answers[0]" placeholder="选择表达式" :disabled="quizChecked">
-                            <el-option v-for="(option, index) in options[0]" :key="index" :label="option.label"
-                                :value="option.value"></el-option>
+                        <math-formula expression="J(w) = " />
+
+                        <el-select v-model="answers[0]" placeholder="选择表达式">
+                            <el-option v-for="(option, index) in options[0]" :key="index" :value="option.value"
+                                :label="option.rawLabel">
+                                <span class="katex-option" v-html="option.label"></span>
+                            </el-option>
                         </el-select>
                     </div>
                 </div>
@@ -46,14 +49,19 @@
                         通过拉格朗日乘数法求解这个优化问题，我们得到：
                     </p>
                     <div class="formula-container">
-                        <el-select v-model="answers[1]" placeholder="选择表达式" :disabled="quizChecked">
-                            <el-option v-for="(option, index) in options[1]" :key="index" :label="option.label"
-                                :value="option.value"></el-option>
+                        <el-select v-model="answers[1]" placeholder="选择表达式">
+                            <el-option v-for="(option, index) in options[1]" :key="index" :value="option.value"
+                                :label="option.rawLabel">
+                                <span class="katex-option" v-html="option.label"></span>
+                            </el-option>
                         </el-select>
-                        $ = \lambda $
-                        <el-select v-model="answers[2]" placeholder="选择表达式" :disabled="quizChecked">
-                            <el-option v-for="(option, index) in options[2]" :key="index" :label="option.label"
-                                :value="option.value"></el-option>
+                        <math-formula expression=" = \lambda " />
+
+                        <el-select v-model="answers[2]" placeholder="选择表达式">
+                            <el-option v-for="(option, index) in options[2]" :key="index" :value="option.value"
+                                :label="option.rawLabel">
+                                <span class="katex-option" v-html="option.label"></span>
+                            </el-option>
                         </el-select>
                     </div>
                 </div>
@@ -63,26 +71,31 @@
                         该方程通常被称为广义特征值问题。另一种等价形式是：
                     </p>
                     <div class="formula-container">
-                        <el-select v-model="answers[3]" placeholder="选择表达式" :disabled="quizChecked">
-                            <el-option v-for="(option, index) in options[3]" :key="index" :label="option.label"
-                                :value="option.value"></el-option>
+                        <el-select v-model="answers[3]" placeholder="选择表达式">
+                            <el-option v-for="(option, index) in options[3]" :key="index" :value="option.value"
+                                :label="option.rawLabel">
+                                <span class="katex-option" v-html="option.label"></span>
+                            </el-option>
                         </el-select>
-                        $ = \lambda w$
+                        <math-formula expression=" = \lambda w" />
                     </div>
                 </div>
 
                 <div class="quiz-item">
                     <p>
                         LDA投影方向的解是矩阵
-                        <el-select v-model="answers[4]" placeholder="选择表达式" style="width: 150px"
-                            :disabled="quizChecked">
-                            <el-option v-for="(option, index) in options[4]" :key="index" :label="option.label"
-                                :value="option.value"></el-option>
+                        <el-select v-model="answers[4]" placeholder="选择表达式" style="width: 150px">
+                            <el-option v-for="(option, index) in options[4]" :key="index" :value="option.value"
+                                :label="option.rawLabel">
+                                <span class="katex-option" v-html="option.label"></span>
+                            </el-option>
                         </el-select>
                         的特征向量，对应于最大的
-                        <el-select v-model="answers[5]" placeholder="选择数字" style="width: 150px" :disabled="quizChecked">
-                            <el-option v-for="(option, index) in options[5]" :key="index" :label="option.label"
-                                :value="option.value"></el-option>
+                        <el-select v-model="answers[5]" placeholder="选择数字" style="width: 150px">
+                            <el-option v-for="(option, index) in options[5]" :key="index" :value="option.value"
+                                :label="option.rawLabel">
+                                <span class="katex-option" v-html="option.label"></span>
+                            </el-option>
                         </el-select>
                         个特征值。
                     </p>
@@ -124,6 +137,7 @@
 import { marked } from 'marked';
 import 'katex/dist/katex.min.css';
 import katex from 'katex';
+import MathFormula from '@/utils/MathFormula.vue';
 
 // 处理数学公式（简单例子）
 function renderMath(markdown) {
@@ -132,8 +146,13 @@ function renderMath(markdown) {
         .replace(/\$([^$]+)\$/g, (_, expr) => katex.renderToString(expr, { displayMode: false }))
 }
 
+
+
 export default {
     name: 'GeneralizedEigenvalueFormulation',
+    components: {
+        MathFormula
+    },
     props: {
         sectionId: {
             type: String,
@@ -146,6 +165,18 @@ export default {
         totalSections: {
             type: Number,
             required: true
+        },
+        userAnswers: {
+            default: null
+        }
+    },
+    watch: {
+        // 当从父组件收到新的用户答案时更新本地状态
+        userAnswers(newVal) {
+            if (newVal) {
+                this.answers = JSON.parse(newVal);
+            }
+
         }
     },
     data() {
@@ -232,43 +263,208 @@ $$
       `,
             isCompleted: false,
 
+
             // 互动练习数据
             options: [
                 [
-                    { value: 0, label: "w^T S_W w / w^T S_B w" },
-                    { value: 1, label: "w^T S_B w / w^T S_W w" },
-                    { value: 2, label: "(w^T S_B w - w^T S_W w)" },
-                    { value: 3, label: "w^T (S_B - S_W) w" }
+                    {
+                        value: 0,
+                        rawLabel: "w^T S_W w / w^T S_B w",
+                        label: katex.renderToString("\\frac{w^T S_W w}{w^T S_B w}")
+                    },
+                    {
+                        value: 1,
+                        rawLabel: "w^T S_B w / w^T S_W w",
+                        label: katex.renderToString("\\frac{w^T S_B w}{w^T S_W w}")
+                    },
+                    {
+                        value: 2,
+                        rawLabel: "(w^T S_B w - w^T S_W w)",
+                        label: katex.renderToString("(w^T S_B w - w^T S_W w)")
+                    },
+                    {
+                        value: 3,
+                        rawLabel: "w^T (S_B - S_W) w",
+                        label: katex.renderToString("w^T (S_B - S_W) w")
+                    }
                 ],
                 [
-                    { value: 0, label: "S_W w" },
-                    { value: 1, label: "S_B w" },
-                    { value: 2, label: "w^T S_B" },
-                    { value: 3, label: "S_B S_W w" }
+                    {
+                        value: 0,
+                        rawLabel: "S_W w",
+                        label: katex.renderToString("S_W w", {
+                            displayMode: true,
+                        })
+                    },
+                    {
+                        value: 1,
+                        rawLabel: "S_B w",
+                        label: katex.renderToString("S_B w", {
+                            displayMode: true,
+                        })
+                    },
+                    {
+                        value: 2,
+                        rawLabel: "w^T S_B",
+                        label: katex.renderToString("w^T S_B", {
+                            displayMode: true,
+                            throwOnError: false
+                        })
+                    },
+                    {
+                        value: 3,
+                        rawLabel: "S_B S_W w",
+                        label: katex.renderToString("S_B S_W w", {
+                            displayMode: true,
+                            throwOnError: false
+                        })
+                    }
                 ],
                 [
-                    { value: 0, label: "S_W w" },
-                    { value: 1, label: "S_B w" },
-                    { value: 2, label: "w" },
-                    { value: 3, label: "S_W S_B w" }
+                    {
+                        value: 0,
+                        rawLabel: "S_W w",
+                        label: katex.renderToString("S_W w", {
+                            displayMode: true,
+                            throwOnError: false
+                        })
+                    },
+                    {
+                        value: 1,
+                        rawLabel: "S_B w",
+                        label: katex.renderToString("S_B w", {
+                            displayMode: true,
+                            throwOnError: false
+                        })
+                    },
+                    {
+                        value: 2,
+                        rawLabel: "w",
+                        label: katex.renderToString("w", {
+                            displayMode: true,
+                            throwOnError: false
+                        })
+                    },
+                    {
+                        value: 3,
+                        rawLabel: "S_W S_B w",
+                        label: katex.renderToString("S_W S_B w", {
+                            displayMode: true,
+                            throwOnError: false
+                        })
+                    }
                 ],
                 [
-                    { value: 0, label: "S_W^{-1} w" },
-                    { value: 1, label: "S_B S_W^{-1} w" },
-                    { value: 2, label: "S_W^{-1} S_B w" },
-                    { value: 3, label: "S_B^{-1} S_W w" }
+                    {
+                        value: 0,
+                        rawLabel: "S_W^{-1} w",
+                        label: katex.renderToString("S_W^{-1} w", {
+                            displayMode: true,
+                            throwOnError: false
+                        })
+                    },
+                    {
+                        value: 1,
+                        rawLabel: "S_B S_W^{-1} w",
+                        label: katex.renderToString("S_B S_W^{-1} w", {
+                            displayMode: true,
+                            throwOnError: false
+                        })
+                    },
+                    {
+                        value: 2,
+                        rawLabel: "S_W^{-1} S_B w",
+                        label: katex.renderToString("S_W^{-1} S_B w", {
+                            displayMode: true,
+                            throwOnError: false
+                        })
+                    },
+                    {
+                        value: 3,
+                        rawLabel: "S_B^{-1} S_W w",
+                        label: katex.renderToString("S_B^{-1} S_W w", {
+                            displayMode: true,
+                            throwOnError: false
+                        })
+                    }
                 ],
                 [
-                    { value: 0, label: "S_W^{-1}" },
-                    { value: 1, label: "S_B^{-1}" },
-                    { value: 2, label: "S_W^{-1} S_B" },
-                    { value: 3, label: "S_B S_W^{-1}" }
+                    {
+                        value: 0,
+                        rawLabel: "S_W^{-1}",
+                        label: katex.renderToString("S_W^{-1}", {
+                            displayMode: true,
+                            throwOnError: false
+                        })
+                    },
+                    {
+                        value: 1,
+                        rawLabel: "S_B^{-1}",
+                        label: katex.renderToString("S_B^{-1}", {
+                            displayMode: true,
+                            throwOnError: false
+                        })
+                    },
+                    {
+                        value: 2,
+                        rawLabel: "S_W^{-1} S_B",
+                        label: katex.renderToString("S_W^{-1} S_B", {
+                            displayMode: true,
+                            throwOnError: false
+                        })
+                    },
+                    {
+                        value: 3,
+                        rawLabel: "S_B S_W^{-1}",
+                        label: katex.renderToString("S_B S_W^{-1}", {
+                            displayMode: true,
+                            throwOnError: false
+                        })
+                    }
                 ],
                 [
-                    { value: 0, label: "1" },
-                    { value: 1, label: "k" },
-                    { value: 2, label: "k-1" },
-                    { value: 3, label: "d" }
+                    {
+                        value: 0,
+                        rawLabel: "1",
+                        label: katex.renderToString("1", {
+                            displayMode: true,
+                            throwOnError: false
+                        })
+                    },
+                    {
+                        value: 1,
+                        rawLabel: "k",
+                        label: katex.renderToString("k", {
+                            displayMode: true,
+                            throwOnError: false
+                        })
+                    },
+                    {
+                        value: 2,
+                        rawLabel: "k-1",
+                        label: katex.renderToString("k-1", {
+                            displayMode: true,
+                            throwOnError: false
+                        })
+                    },
+                    {
+                        value: 3,
+                        rawLabel: "d",
+                        label: katex.renderToString("d", {
+                            displayMode: true,
+                            throwOnError: false
+                        })
+                    }
+                ],
+                [
+                    {
+                        value: 0,
+                        rawLabel: "p_{j|i} = \\frac{\\exp(-\\|x_i - x_j\\|^2 / 2\\sigma_i^2)}{\\sum_{k \\neq i} \\exp(-\\|x_i - x_k\\|^2 / 2\\sigma_i^2)}",
+                        label: katex.renderToString("p_{j|i} = \\frac{\\exp(-\\|x_i - x_j\\|^2 / 2\\sigma_i^2)}{\\sum_{k \\neq i} \\exp(-\\|x_i - x_k\\|^2 / 2\\sigma_i^2)}", {
+                            displayMode: true,
+                            throwOnError: false
+                        })
+                    }
                 ]
             ],
             answers: [null, null, null, null, null, null],
@@ -309,9 +505,13 @@ $$
     },
     methods: {
         checkAnswers() {
+
             this.quizChecked = true;
             this.answerResults = this.answers.map((answer, index) => answer === this.correctAnswers[index]);
             this.allCorrect = this.answerResults.every(result => result);
+
+            // 发送答案给父组件保存
+            this.$emit('save-answer', JSON.stringify(this.answers));
 
             if (this.allCorrect) {
                 this.response = `

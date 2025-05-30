@@ -10,6 +10,7 @@
                 <!-- 动态加载所有教学组件 -->
                 <component v-for="(section, index) in sections" :key="section.id" :is="section.component"
                     :ref="'section-' + section.id" @complete="markSectionComplete(section.id)"
+                    @save-answer="saveUserAnswer(section.id, $event)" :userAnswers="userAnswers[section.id] || ''"
                     :class="{ 'section-complete': completedSections.includes(section.id) }" :sectionIndex="index + 1"
                     :totalSections="sections.length" />
             </div>
@@ -36,6 +37,7 @@ import ApplicationsOfLDA from './lessons/LDAapplication.vue'
 // import LDALimitations from './lessons/LDALimitations.vue'
 // import AdvancedLDATopics from './lessons/AdvancedLDATopics.vue'
 // import FinalQuiz from './lessons/FinalQuiz.vue'
+import axios from '@/utils/myAxios';
 
 export default {
     name: 'LdaTutorial',
@@ -61,6 +63,8 @@ export default {
         return {
             activeSection: 'introduction-to-lda',
             completedSections: [],
+            userId: null, // 用户ID将从会话或登录状态获取
+            userAnswers: {}, // 存储用户回答
             sections: [
                 { id: 'introduction-to-lda', title: '1. LDA介绍', component: 'IntroductionToLDA' },
                 { id: 'dimensionality-reduction', title: '2. 降维概念', component: 'DimensionalityReductionConcept' },
@@ -81,20 +85,107 @@ export default {
         }
     },
     mounted() {
-        // 从本地存储恢复已完成的部分
-        const saved = localStorage.getItem('lda-tutorial-progress');
-        if (saved) {
-            try {
-                this.completedSections = JSON.parse(saved);
-            } catch (e) {
-                console.error('Failed to restore progress:', e);
-            }
-        }
+        // 获取当前用户ID
+        this.getUserId().then(() => {
+            // 从后端获取用户进度
+            this.loadUserProgress();
+        });
 
         // 监听滚动以更新当前显示的部分
         this.setupScrollObserver();
     },
     methods: {
+        // 获取用户ID的方法
+        async getUserId() {
+            try {
+
+                // const response = await axios.get('/user/current');
+                this.userId = localStorage.getItem('userId');
+                return this.userId;
+            } catch (error) {
+                console.error('获取用户ID失败:', error);
+                // 如果获取失败，可以使用一个临时ID或提示用户登录
+                // this.userId = 'guest-' + Math.random().toString(36).substring(2, 15);
+                return null;
+            }
+        },
+
+        // 加载用户进度
+        async loadUserProgress() {
+            if (!this.userId) return;
+
+            try {
+                const response = await axios.get(`/lda-tutorial/progress/${this.userId}`);
+                const progressData = response;
+                console.log("LDA教程的进度response", response);
+
+                // 设置已完成的章节
+                if (progressData.completedSections && Array.isArray(progressData.completedSections)) {
+                    this.completedSections = progressData.completedSections;
+                }
+
+                // 设置用户回答
+                if (progressData.answers) {
+                    this.userAnswers = progressData.answers;
+                }
+
+                // 如果有已完成的章节，可以跳转到上次学习的位置
+                // if (this.completedSections.length > 0) {
+                //     // 找到最后完成的章节的下一个章节
+                //     const lastCompletedIndex = this.sections.findIndex(
+                //         section => section.id === this.completedSections[this.completedSections.length - 1]
+                //     );
+
+                //     if (lastCompletedIndex >= 0 && lastCompletedIndex < this.sections.length - 1) {
+                //         // 跳转到下一个未完成的章节
+                //         const nextSectionId = this.sections[lastCompletedIndex + 1].id;
+                //         this.$nextTick(() => {
+                //             this.scrollToSection(nextSectionId);
+                //         });
+                //     }
+                // }
+            } catch (error) {
+                console.error('加载用户进度失败:', error);
+            }
+        },
+
+        // 保存用户进度到后端
+        async saveUserProgress(sectionId = null, answer = null) {
+            if (!this.userId) return;
+
+            try {
+                // 构建要发送到后端的数据对象
+                const progressData = {
+                    userId: this.userId,
+                    // completedSections: this.completedSections,
+                    // answers: this.userAnswers
+                };
+
+                // 如果提供了特定章节和回答，更新那个章节的回答
+                if (sectionId && answer !== null) {
+                    progressData.sectionId = sectionId;
+                    progressData.answer = answer;
+                }
+                console.log('进度提交', progressData);
+                await axios.post('/lda-tutorial/answer', progressData);
+                console.log('用户进度保存成功');
+            } catch (error) {
+                console.error('保存用户进度失败:', error);
+            }
+        },
+
+        // 保存用户回答
+        saveUserAnswer(sectionId, answer) {
+            console.log(`保存用户在章节 ${sectionId} 的回答:`, answer);
+            this.userAnswers = {
+                ...this.userAnswers,
+                [sectionId]: answer
+            };
+
+            // 保存到后端
+            this.saveUserProgress(sectionId, answer);
+        },
+
         scrollToSection(sectionId) {
             console.log("LDA选中章节", sectionId);
             this.activeSection = sectionId;
@@ -112,13 +203,15 @@ export default {
                 });
             }
         },
+
         markSectionComplete(sectionId) {
             if (!this.completedSections.includes(sectionId)) {
                 this.completedSections.push(sectionId);
-                // 保存进度到本地存储
-                localStorage.setItem('lda-tutorial-progress', JSON.stringify(this.completedSections));
+                // 保存进度到后端
+                // this.saveUserProgress();
             }
         },
+
         setupScrollObserver() {
             // 使用 Intersection Observer API 检测当前可见的部分
             const options = {

@@ -180,7 +180,7 @@
           
           # 选择正确的代码计算当前类的散布矩阵
           for j in range(len(X_by_class[c])):
-              <el-select v-model="codeAnswers[0]" placeholder="选择代码" size="small" :disabled="codeChecked">
+              <el-select v-model="codeAnswers[0]" placeholder="选择代码" size="small" >
                 <el-option 
                   v-for="(option, index) in codeOptions[0]" 
                   :key="index"
@@ -209,7 +209,7 @@
       S_B = np.zeros((n_features, n_features))
       
       for i in range(n_classes):
-          mean_diff = <el-select v-model="codeAnswers[1]" placeholder="选择代码" size="small" :disabled="codeChecked">
+          mean_diff = <el-select v-model="codeAnswers[1]" placeholder="选择代码" size="small" >
             <el-option 
               v-for="(option, index) in codeOptions[1]" 
               :key="index"
@@ -219,7 +219,7 @@
           </el-select>
           
           # 类均值与整体均值的外积
-          S_B += <el-select v-model="codeAnswers[2]" placeholder="选择代码" size="small" :disabled="codeChecked">
+          S_B += <el-select v-model="codeAnswers[2]" placeholder="选择代码" size="small" >
             <el-option 
               v-for="(option, index) in codeOptions[2]" 
               :key="index"
@@ -255,7 +255,7 @@
       # 可能需要处理S_W接近奇异的情况
       try:
           # 求解 S_W^(-1) * S_B 的特征值问题
-          <el-select v-model="codeAnswers[3]" placeholder="选择代码" size="small" :disabled="codeChecked">
+          <el-select v-model="codeAnswers[3]" placeholder="选择代码" size="small" >
             <el-option 
               v-for="(option, index) in codeOptions[3]" 
               :key="index"
@@ -276,7 +276,7 @@
                         </el-tabs>
 
                         <div class="code-actions" v-if="!codeChecked">
-                            <el-button type="primary" @click="checkCode" :disabled="!allCodeAnswered">
+                            <el-button type="primary" @click="checkCode">
                                 检查代码
                             </el-button>
                         </div>
@@ -341,8 +341,22 @@ export default {
         totalSections: {
             type: Number,
             required: true
+        },
+        userAnswers: {
+            default: null
         }
     },
+    watch: {
+        // 当从父组件收到新的用户答案时更新本地状态
+        userAnswers(newVal) {
+            if (newVal) {
+                this.codeAnswers = JSON.parse(newVal);
+                console.log("LDA实现组件的回答更新", this.codeAnswers);
+            }
+
+        }
+    },
+
     data() {
         return {
             title: "LDA实现步骤",
@@ -403,17 +417,17 @@ export default {
                 },
                 {
                     id: 3,
-                    text: "计算类内散布矩阵S_W",
+                    text: "计算类内散布矩阵",
                     correctPosition: 2
                 },
                 {
                     id: 4,
-                    text: "计算类间散布矩阵S_B",
+                    text: "计算类间散布矩阵",
                     correctPosition: 3
                 },
                 {
                     id: 5,
-                    text: "求解广义特征值问题S_B w = λS_W w",
+                    text: "求解广义特征值问题",
                     correctPosition: 4
                 },
                 {
@@ -541,6 +555,9 @@ export default {
 
         checkCode() {
             this.codeChecked = true;
+
+            // 发送答案给父组件保存
+            this.$emit('save-answer', JSON.stringify(this.codeAnswers));
 
             // 检查代码是否全部正确
             this.codeResults = this.codeAnswers.map((answer, index) => answer === this.correctCodeAnswers[index]);

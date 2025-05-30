@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, Blueprint
+from flask import request, jsonify, Blueprint
 import numpy as np
 import uuid
 import math
@@ -138,73 +138,13 @@ def compute_high_dimensional_similarity(data, formula, parameters):
         # UMAP高维相似度
         n_neighbors = int(parameters.get('n_neighbors', 15))
         min_dist = parameters.get('min_dist', 0.1)
-        #
-        # # 使用scipy计算欧氏距离矩阵
-        # distances = squareform(pdist(data, 'euclidean'))
-        #
-        # # 初始化相似度矩阵
-        # similarity_matrix = np.zeros((n_samples, n_samples))
-        #
-        # # 定义寻找sigma的函数
-        # def find_sigma_umap(distances_i, indices, target_entropy=None):
-        #     """
-        #     二分查找寻找sigma，使得近邻概率分布的熵约等于log(k)
-        #     """
-        #     if target_entropy is None:
-        #         target_entropy = np.log(len(indices))
-        #
-        #     def calc_entropy(sigma):
-        #         d = distances_i[indices]
-        #         p = np.exp(-d / sigma)
-        #         p = p / np.sum(p)
-        #         return -np.sum(p * np.log(p + 1e-8))
-        #
-        #     # 二分查找合适的sigma
-        #     lo, hi = 0.01, 100.0
-        #
-        #     for i in range(30):  # 通常30次迭代足够
-        #         mid = (lo + hi) / 2
-        #         entropy = calc_entropy(mid)
-        #         if entropy < target_entropy:
-        #             lo = mid
-        #         else:
-        #             hi = mid
-        #
-        #     return mid
-        #
-        # # 对每个点计算相似度
-        # for i in range(n_samples):
-        #     # 找到k近邻
-        #     indices = np.argsort(distances[i, :])[1:n_neighbors + 1]
-        #     # 找到适合的sigma_i值，使得概率分布的熵等于log(k)
-        #     sigma_i = find_sigma_umap(distances[i, :], indices)
-        #     # 计算条件概率 p_j|i
-        #     sim_row = np.zeros(n_samples)
-        #
-        #     for j in range(n_samples):
-        #         if i != j:
-        #             # 标准UMAP公式: exp(-d_ij / sigma_i)
-        #             sim_row[j] = np.exp(-distances[i, j] / sigma_i)
-        #
-        #     # 归一化，使得概率和为1
-        #     sum_p = np.sum(sim_row)
-        #
-        #     if sum_p > 0:
-        #         sim_row = sim_row / sum_p
-        #
-        #     similarity_matrix[i, :] = sim_row
-        #
-        # # 计算UMAP特有的相似度矩阵 P_ij = p_j|i + p_i|j - p_j|i * p_i|j
-        # P_ij = similarity_matrix + similarity_matrix.T - similarity_matrix * similarity_matrix.T
-        # similarity_matrix = P_ij
+
         similarity_matrix = get_umap_similarity_matrix(data,n_neighbors)
 
     else:
         raise ValueError(f"未知的高维相似度计算公式: {formula}")
 
     return similarity_matrix
-
-
 
 def get_umap_similarity_matrix(data, n_neighbors=15, metric='euclidean', random_state=42):
     """
@@ -311,21 +251,10 @@ def compute_low_dimensional_similarity(data, formula, parameters):
 
         similarity_matrix = umap_low_dim_similarity_with_umap_params(data,parameters.get('min_dist',0.1))
 
-        # 计算欧氏距离矩阵
-        # distances = squareform(pdist(data, 'euclidean'))
-        #
-        # # 计算UMAP低维相似度: q_ij = (1 + a * ||y_i - y_j||^2b)^-1
-        # similarity_matrix = 1.0 / (1.0 + a * (distances ** (2 * b)))
-        # np.fill_diagonal(similarity_matrix, 0.0)  # q_ii = 0
-
-        # 归一化 (可选)
-        # similarity_matrix = similarity_matrix / np.sum(similarity_matrix)
-
     else:
         raise ValueError(f"未知的低维相似度计算公式: {formula}")
 
     return similarity_matrix
-
 
 def compute_gaussian_kernel_row(dist_row, i, perplexity):
     """
@@ -403,53 +332,3 @@ def compute_gaussian_kernel_row(dist_row, i, perplexity):
     prob_row = exp_values / np.sum(exp_values)
 
     return prob_row
-
-
-def find_sigma_umap(distances, indices, rho):
-    """
-    为UMAP相似度计算寻找合适的sigma
-
-    参数:
-    - distances: 点i到所有其他点的距离
-    - indices: k近邻的索引
-    - rho: 距离到第k近邻的距离
-
-    返回:
-    - sigma: 缩放参数
-    """
-    target = np.log(indices.shape[0])
-    lo = 0.0
-    hi = np.inf
-    mid = 1.0
-
-    # 二分搜索
-    for _ in range(20):
-        spread = np.zeros(indices.shape[0])
-
-        for i, idx in enumerate(indices):
-            d = max(0, distances[idx] - rho)
-            spread[i] = np.exp(-d / mid)
-
-        # 计算熵
-        sum_spread = np.sum(spread)
-        if sum_spread == 0:
-            break
-
-        entropy = -np.sum((spread / sum_spread) * np.log(spread / sum_spread + 1e-10))
-
-        # 检查是否接近目标熵
-        if np.abs(entropy - target) < 1e-3:
-            break
-
-        # 更新搜索范围
-        if entropy < target:
-            hi = mid
-            mid = (lo + hi) / 2.0
-        else:
-            lo = mid
-            if hi == np.inf:
-                mid = mid * 2.0
-            else:
-                mid = (lo + hi) / 2.0
-
-    return mid

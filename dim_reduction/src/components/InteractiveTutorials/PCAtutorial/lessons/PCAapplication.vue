@@ -14,7 +14,7 @@
                             <div class="application-content">
                                 <h4>PCA在图像压缩中的应用</h4>
 
-                                <div class="image-compression">
+                                <!-- <div class="image-compression">
                                     
 
                                     <div class="compression-controls">
@@ -27,10 +27,10 @@
                                     <div class="compressed-image">
                                         <h5>压缩后图像</h5>
                                         <div class="image-container" ref="compressedImage">
-                                            <!-- D3生成的压缩图像 -->
+                                            
                                         </div>
                                     </div>
-                                </div>
+                                </div> -->
 
                                 <div class="application-explanation">
                                     <p>
@@ -161,6 +161,26 @@ export default {
     name: 'PCAApplications',
     components: {
         BaseSegment
+    },
+    props: {
+        savedAnswer: {
+            type: String,
+            default: null
+        }
+    },
+    watch: {
+        // 监听savedAnswer属性的变化
+        savedAnswer: {
+            immediate: true,
+            handler(newValue) {
+                console.log("PCAapplication子组件接受回答", newValue);
+                if (newValue) {
+                    this.selectedCase = Number(newValue);
+                    //   this.hasSubmittedAnswer = true;
+                    //   this.feedback = '您之前已经完成了这个章节的练习。';
+                }
+            }
+        }
     },
     data() {
         return {
@@ -862,6 +882,9 @@ export default {
             // 正确答案是案例2（医学图像）和案例3（股票市场分析）
             // 但只需选择一个
             const correctAnswers = [2, 3];
+
+            // 向父组件发送答案提交事件
+            this.$emit('answer-submitted', this.selectedCase);
 
             if (correctAnswers.includes(this.selectedCase)) {
                 // 回答正确

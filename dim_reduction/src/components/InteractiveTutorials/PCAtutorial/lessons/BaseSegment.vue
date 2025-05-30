@@ -27,9 +27,9 @@
         </div>
 
         <!-- 总结按钮 - 仅在最后一个片段完成后显示 -->
-        <div v-if="isCompleted && isLastSegment" class="summary-section">
+        <!-- <div v-if="isCompleted && isLastSegment" class="summary-section">
             <el-button type="success" @click="showSummary">查看学习总结</el-button>
-        </div>
+        </div> -->
     </div>
 </template>
 
@@ -111,6 +111,7 @@ export default {
 
         // 继续到下一部分
         continueToNext() {
+            console.log("继续到下一部分");
             this.$root.$emit('unlock-next-segment', this.segmentId);
         },
 

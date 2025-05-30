@@ -32,7 +32,7 @@
                 <div class="small-contain" key="smallContainRegister" v-if="isLogin">
                     <div class="stitle">你好，朋友!</div>
                     <p class="scontent">开始注册，和我们一起旅行</p>
-                    <button class="sbutton" @click="changeType">注册</button>
+                    <!-- <button class="sbutton" @click="changeType">注册</button> -->
                 </div>
                 <div class="small-contain" key="smallContainLogin" v-else>
                     <div class="stitle">欢迎回来!</div>
@@ -42,6 +42,7 @@
             </div>
             <!-- <el-alert v-if="errorMsg" :title="errorMsg" type="error" show-icon></el-alert> -->
         </div>
+
 
     </div>
 </template>
@@ -85,7 +86,9 @@ export default {
                         console.log("登录信息", res);
                         if (res.data.code === 200) {
                             this.$message.success('登录成功')
-                            localStorage.setItem('studentId', this.form.studentId)
+                            // 清空全部 localStorage
+                            // localStorage.clear();
+                            localStorage.setItem('userId', this.form.studentId)
                             this.$router.push('/mainSelect') // 替换为你的跳转页
                         } else {
                             // this.errorMsg = res.data.msg

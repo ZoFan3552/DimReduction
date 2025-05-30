@@ -31,6 +31,26 @@ export default {
     components: {
         BaseSegment
     },
+    props: {
+        savedAnswer: {
+            type: String,
+            default: null
+        }
+    },
+    watch: {
+        // 监听savedAnswer属性的变化
+        savedAnswer: {
+            immediate: true,
+            handler(newValue) {
+                console.log("intro子组件接受回答", newValue);
+                if (newValue) {
+                    this.selectedAnswer = Number(newValue);
+                    //   this.hasSubmittedAnswer = true;
+                    //   this.feedback = '您之前已经完成了这个章节的练习。';
+                }
+            }
+        }
+    },
     data() {
         return {
             title: '1. 主成分分析(PCA)简介',
@@ -78,6 +98,10 @@ export default {
             this.attempts++;
             const correctAnswerIndex = 1; // 正确答案是第二个选项
 
+            // 向父组件发送答案提交事件
+            this.$emit('answer-submitted', this.selectedAnswer);
+
+            console.log("简介的回答", this.selectedAnswer)
             if (this.selectedAnswer === correctAnswerIndex) {
                 // 回答正确
                 this.$refs.baseSegment.showResponse(
@@ -85,6 +109,8 @@ export default {
                     "PCA的主要目的确实是寻找数据中的主要方向，将高维数据降到低维空间，同时保留最大的方差。",
                     "success"
                 );
+
+
 
                 // 标记本节完成
                 setTimeout(() => {

@@ -129,8 +129,21 @@ export default {
         totalSections: {
             type: Number,
             required: true
+        },
+        userAnswers: {
+            default: null
         }
     },
+    watch: {
+        // 当从父组件收到新的用户答案时更新本地状态
+        userAnswers(newVal) {
+            if (newVal) {
+                this.matches = JSON.parse(newVal);
+            }
+
+        }
+    },
+
     data() {
         return {
             title: "LDA数学基础",
@@ -383,6 +396,9 @@ $$
         },
 
         checkAllMatches() {
+
+
+
             // 检查所有匹配是否正确
             this.matchResults = this.matches.map(match => {
                 const description = this.descriptions[match.descriptionIndex];
@@ -391,6 +407,9 @@ $$
                     isCorrect: description.correctFormulaIndex === match.formulaIndex
                 };
             });
+
+            // 发送答案给父组件保存
+            this.$emit('save-answer', JSON.stringify(this.matches));
 
             // 计算正确匹配的数量
             const correctCount = this.matchResults.filter(r => r.isCorrect).length;

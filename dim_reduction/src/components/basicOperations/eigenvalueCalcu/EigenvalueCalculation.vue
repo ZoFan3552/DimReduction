@@ -101,7 +101,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from '@/utils/flaskAxios';
 
 export default {
     name: 'EigenSolver',
@@ -220,15 +220,15 @@ export default {
             }
 
             // 发送请求到后端
-            axios.post('http://localhost:5000/api/calculate-eigen', requestData)
+            axios.post('/api/calculate-eigen', requestData)
                 .then(response => {
                     this.results = {
-                        eigenvalues: response.data.eigenvalues,
-                        eigenvectors: response.data.eigenvectors
+                        eigenvalues: response.eigenvalues,
+                        eigenvectors: response.eigenvectors
                     };
 
                     // 发送更新后的节点数据到父组件
-                    this.$emit('analysis-complete', response.data.new_node);
+                    this.$emit('analysis-complete', response.new_node);
 
                     this.$message({
                         message: '特征值和特征向量计算成功',
@@ -237,7 +237,7 @@ export default {
                 })
                 .catch(error => {
                     console.error('计算特征值和特征向量时出错:', error);
-                    this.$message.error('计算失败: ' + (error.response?.data?.error || '未知错误'));
+                    this.$message.error('计算失败: ' + (error.response?.error || '未知错误'));
                 })
                 .finally(() => {
                     this.loading = false;

@@ -1,85 +1,11 @@
 from flask import Flask, request, jsonify, Blueprint
-import numpy as np
-import uuid
-from scipy.spatial.distance import pdist, squareform
 from sklearn.metrics import pairwise_distances
-
-gradient_api = Blueprint('gradient_api', __name__)
-from flask import Flask, request, jsonify
 import numpy as np
 import uuid
-from scipy.spatial.distance import pdist, squareform
 import copy
 from scipy.spatial.distance import pdist, squareform
 from umap.umap_ import find_ab_params
-
-
-
-def compute_high_dimensional_similarity(X, perplexity=30.0):
-    """
-    计算高维数据的相似度矩阵 (t-SNE/SNE)
-    """
-    n = X.shape[0]
-    similarities = np.zeros((n, n))
-
-    # 计算成对距离矩阵
-    sum_X = np.sum(np.square(X), axis=1)
-    D = np.add(np.add(-2 * np.dot(X, X.T), sum_X).T, sum_X)
-
-    # t-SNE困惑度参数
-    tol = 1e-5
-
-    for i in range(n):
-        # 为每个点设置自适应的高斯核宽度sigma
-        beta = 1.0
-        beta_min = -np.inf
-        beta_max = np.inf
-        Di = D[i, np.concatenate((np.arange(0, i), np.arange(i + 1, n)))]
-
-        # 二分搜索找到合适的beta使得perplexity正确
-        H_target = np.log(perplexity)
-
-        for _ in range(50):
-            # 计算给定beta下的条件概率
-            P_i = np.exp(-Di * beta)
-            sum_P_i = np.sum(P_i)
-
-            if sum_P_i == 0:
-                H_i = 0
-                P_i = np.zeros_like(P_i)
-            else:
-                P_i = P_i / sum_P_i
-                H_i = -np.sum(P_i * np.log(P_i + 1e-10))
-
-            # 调整beta以匹配目标perplexity
-            H_diff = H_i - H_target
-
-            if np.abs(H_diff) < tol:
-                break
-
-            if H_diff > 0:
-                beta_min = beta
-                if beta_max == np.inf:
-                    beta *= 2.0
-                else:
-                    beta = (beta + beta_max) / 2.0
-            else:
-                beta_max = beta
-                if beta_min == -np.inf:
-                    beta /= 2.0
-                else:
-                    beta = (beta + beta_min) / 2.0
-
-        # 设置条件概率
-        indices = np.concatenate((np.arange(0, i), np.arange(i + 1, n)))
-        similarities[i, indices] = P_i
-
-    # 对称化相似度矩阵
-    similarities = (similarities + similarities.T) / (2 * n)
-    # 确保没有负值
-    similarities = np.maximum(similarities, 1e-12)
-
-    return similarities
+gradient_api = Blueprint('gradient_api', __name__)
 
 
 def compute_low_dimensional_similarity_tsne(Y):
@@ -145,48 +71,6 @@ def compute_low_dimensional_similarity_sne(Y):
 
     return q
 
-
-def compute_low_dimensional_similarity_umap(Y, min_dist=0.1):
-    """
-    计算UMAP低维相似度矩阵的近似版本
-    """
-    n = Y.shape[0]
-
-    # 计算欧氏距离
-    distances = squareform(pdist(Y, 'euclidean'))
-
-    # 确保没有NaN
-    distances = np.nan_to_num(distances, nan=0.0, posinf=np.finfo(float).max, neginf=0.0)
-
-    # 确保距离非负
-    distances = np.maximum(distances, 0.0)
-
-    # UMAP距离变换
-    a = 1.0
-    b = 1.0
-
-    # 寻找a,b使得min_dist映射到0.5
-    if min_dist > 0:
-        a = 1.0
-        b = np.log2(max(min_dist, 1e-10)) * (-a)
-
-    # 应用UMAP变换函数 - 确保不会产生无效值
-    q = 1.0 / (1.0 + a * np.power(np.maximum(distances, 1e-10), 2 * b))
-    np.fill_diagonal(q, 0)
-
-    # 归一化，防止除以零
-    q_sum = np.sum(q)
-    if q_sum < 1e-12:
-        # 如果和太小，添加一个小常数防止除零
-        q = q + 1e-12
-        q = q / np.sum(q)
-    else:
-        q = q / q_sum
-
-    # 确保最小值
-    q = np.maximum(q, 1e-12)
-
-    return q
 
 
 def compute_gradient_tsne(P, Q, Y):
@@ -263,65 +147,7 @@ def compute_gradient_sne(P, Q, Y):
     return grad
 
 
-def compute_gradient_umap(P, Q, Y, min_dist=0.1):
-    """
-    计算UMAP梯度的近似版本
-    """
-    n = Y.shape[0]
 
-    # 计算欧氏距离
-    distances = squareform(pdist(Y, 'euclidean'))
-
-    # 避免无效值
-    distances = np.nan_to_num(distances, nan=1e-10, posinf=1e10, neginf=1e-10)
-
-    # 确保距离非负且不为零
-    distances = np.maximum(distances, 1e-10)
-
-    # UMAP参数
-    a = 1.0
-    b = np.log2(max(min_dist, 1e-10)) * (-a)
-
-    # UMAP梯度计算中的PQ差异
-    PQ_diff = P - Q
-
-    # 避免无效值
-    PQ_diff = np.nan_to_num(PQ_diff, nan=0.0, posinf=0.0, neginf=0.0)
-
-    grad = np.zeros_like(Y)
-
-    # 避免除以零
-    for i in range(n):
-        for j in range(n):
-            if i != j:
-                try:
-                    # UMAP梯度方向
-                    direction = (Y[i] - Y[j]) / distances[i, j]
-
-                    # UMAP梯度幅度
-                    q_ij = Q[i, j] * n * n  # 还原未标准化的q
-                    force = PQ_diff[i, j] * q_ij * (1 - q_ij)
-
-                    # 检查是否有无效值
-                    if np.isnan(force) or np.isinf(force):
-                        continue
-
-                    # 限制力的范围，避免数值不稳定
-                    if abs(force) > 10.0:
-                        force = 10.0 * np.sign(force)
-
-                    # 累加梯度
-                    grad[i] += direction * force
-                except:
-                    # 忽略产生异常的情况
-                    continue
-
-    # 限制梯度范数，避免梯度爆炸
-    grad_norm = np.linalg.norm(grad)
-    if grad_norm > 10.0:
-        grad = grad / grad_norm * 10.0
-
-    return grad
 
 
 def calculate_cost_tsne(P, Q):
@@ -372,27 +198,6 @@ def calculate_cost_sne(P, Q):
     return np.sum(kl)
 
 
-def calculate_cost_umap(P, Q):
-    """
-    计算UMAP成本函数值 (交叉熵)
-    """
-    # 确保P和Q中没有无效值
-    P = np.nan_to_num(P, nan=1e-12, posinf=1e-12, neginf=1e-12)
-    Q = np.nan_to_num(Q, nan=1e-12, posinf=1e-12, neginf=1e-12)
-
-    # 确保P和Q在[0,1]范围内
-    P = np.clip(P, 1e-12, 1.0 - 1e-12)
-    Q = np.clip(Q, 1e-12, 1.0 - 1e-12)
-
-    # 计算交叉熵的两部分
-    ce1 = -np.sum(P * np.log(Q))
-    ce2 = -np.sum((1 - P) * np.log(1 - Q))
-
-    # 处理可能的NaN或Inf
-    ce1 = np.nan_to_num(ce1, nan=0.0, posinf=0.0, neginf=0.0)
-    ce2 = np.nan_to_num(ce2, nan=0.0, posinf=0.0, neginf=0.0)
-
-    return ce1 + ce2
 
 
 def calculate_gradient_norm(grad):
@@ -401,33 +206,6 @@ def calculate_gradient_norm(grad):
     """
     return np.sqrt(np.sum(np.square(grad)))
 
-
-def umap_low_dim_similarity_with_umap_params(embedding, a,b, min_dist=0.1):
-    """
-    使用UMAP内部函数计算参数a和b，然后计算低维相似度矩阵
-
-    参数:
-    embedding: 降维后的数据
-    min_dist: 最小距离参数
-    spread: 分布扩散参数
-
-    返回:
-    similarity_matrix: 低维相似度矩阵
-    """
-    # 使用UMAP的函数计算参数a和b
-
-
-    # 计算距离矩阵
-    distances = squareform(pdist(embedding, 'euclidean'))
-    n_samples = embedding.shape[0]
-
-    # 应用UMAP核函数计算相似度
-    similarity_matrix = 1.0 / (1.0 + a * np.maximum(0, distances - min_dist) ** (2 * b))
-
-    # 确保对角线为1
-    np.fill_diagonal(similarity_matrix, 1.0)
-
-    return similarity_matrix
 
 
 def umap_gradient_descent(high_dim_sim, Y_init, learning_rate=1.0, iterations=1000,
@@ -637,12 +415,7 @@ def run_gradient_descent(algorithm, parameters, node_data):
             Y, final_Q,iterations_data = umap_gradient_descent(high_similarity_matrix,Y,learning_rate,iterations,min_dist, recording_interval)
         except Exception as e:
             return {"success": False, "message": f"UMAP梯度下降过程中出错: {str(e)}"}
-        # 对于UMAP，使用部分应用将min_dist参数绑定到函数上
-        # compute_low_similarity = lambda y : umap_low_dim_similarity_with_umap_params(y, a, b,min_dist)
-        # compute_gradient = lambda p, q, y: compute_gradient_umap(p, q, y, min_dist)
-        # calculate_cost = calculate_cost_umap
-        # # 这里不再包含min_dist，因为已经通过lambda捕获了
-        # algorithm_params = {}
+
     else:
         return {"success": False, "message": f"不支持的算法: {algorithm}"}
 

@@ -180,6 +180,19 @@ export default {
         totalSections: {
             type: Number,
             required: true
+        },
+        userAnswers: {
+            default: null
+        }
+
+    },
+    watch: {
+        // 当从父组件收到新的用户答案时更新本地状态
+        userAnswers(newVal) {
+            if (newVal) {
+                this.quizAnswers = JSON.parse(newVal);
+            }
+
         }
     },
     data() {
@@ -445,6 +458,8 @@ export default {
         },
         checkAnswers() {
             this.quizChecked = true;
+            // 发送答案给父组件保存
+            this.$emit('save-answer', JSON.stringify(this.quizAnswers));
 
             // 检查答案是否全部正确
             const allCorrect = this.quizAnswers.every((answer, index) => answer === this.correctAnswers[index]);

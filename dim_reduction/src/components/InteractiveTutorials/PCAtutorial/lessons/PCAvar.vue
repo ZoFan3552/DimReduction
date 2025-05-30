@@ -60,6 +60,26 @@ export default {
     components: {
         BaseSegment
     },
+    props: {
+        savedAnswer: {
+            type: String,
+            default: null
+        }
+    },
+    watch: {
+        // 监听savedAnswer属性的变化
+        savedAnswer: {
+            immediate: true,
+            handler(newValue) {
+                console.log("方差子组件接受回答", newValue);
+                if (newValue) {
+                    this.reflectionAnswer = Number(newValue);
+                    //   this.hasSubmittedAnswer = true;
+                    //   this.feedback = '您之前已经完成了这个章节的练习。';
+                }
+            }
+        }
+    },
     data() {
         return {
             title: '2. 理解数据方差',
@@ -335,7 +355,8 @@ export default {
         checkReflection() {
             this.reflectionAttempts++;
             const correctAnswer = 1; // 正确答案是：方差较大的方向
-
+            // 向父组件发送答案提交事件
+            this.$emit('answer-submitted', this.reflectionAnswer);
             if (this.reflectionAnswer === correctAnswer) {
                 // 回答正确
                 this.$refs.baseSegment.showResponse(

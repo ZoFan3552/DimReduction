@@ -220,10 +220,12 @@ export default {
 
             switch (this.selectedMethod) {
                 case 'origin':
-                    // 所有点都在原点
-                    for (let i = 0; i < n; i++) {
-                        const point = new Array(d).fill(0);
-                        coordinates.push(point);
+                    {// 所有点都在原点附近的小范围内
+                        const range = 0.1; // 定义小范围的大小，可以根据需要调整
+                        for (let i = 0; i < n; i++) {
+                            const point = new Array(d).fill(0).map(() => (Math.random() * 2 - 1) * range); // 在[-range, range]范围内生成随机数
+                            coordinates.push(point);
+                        }
                     }
                     break;
 

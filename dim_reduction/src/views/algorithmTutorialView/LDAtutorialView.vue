@@ -19,7 +19,8 @@
         <!-- 内容区域  -->
         <div class="experiment-content">
             <keep-alive>
-                <component :is="currentComponent" @step-completed="nextStep"></component>
+                <component :is="currentComponent" @step-completed="nextStep" tutorialType="LDA" algorithmType="LDA">
+                </component>
             </keep-alive>
         </div>
 

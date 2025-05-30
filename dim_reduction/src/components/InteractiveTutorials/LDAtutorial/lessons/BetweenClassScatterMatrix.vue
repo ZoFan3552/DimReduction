@@ -116,7 +116,7 @@
                 </el-radio-group>
 
                 <div class="quiz-actions">
-                    <el-button type="primary" @click="checkAnswer" :disabled="quizAnswer === null || quizChecked">
+                    <el-button type="primary" @click="checkAnswer" :disabled="quizAnswer === null">
                         提交答案
                     </el-button>
 
@@ -174,6 +174,18 @@ export default {
         totalSections: {
             type: Number,
             required: true
+        },
+        userAnswers: {
+            default: null
+        }
+    },
+    watch: {
+        // 当从父组件收到新的用户答案时更新本地状态
+        userAnswers(newVal) {
+            if (newVal) {
+                this.quizAnswer = Number(newVal);
+            }
+
         }
     },
     data() {
@@ -652,6 +664,9 @@ $$
         checkAnswer() {
             this.quizChecked = true;
             this.quizCorrect = this.quizAnswer === 1;
+
+            // 发送答案给父组件保存
+            this.$emit('save-answer', this.quizAnswer);
 
             if (this.quizCorrect) {
                 this.response = `

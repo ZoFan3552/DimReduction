@@ -111,7 +111,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from '@/utils/flaskAxios';
 import 'katex/dist/katex.min.css';
 import katex from 'katex';
 
@@ -124,10 +124,10 @@ export default {
             default: null
         },
         // 后端API地址
-        apiUrl: {
-            type: String,
-            default: 'http://localhost:5000/calculate-similarity'
-        }
+        // apiUrl: {
+        //     type: String,
+        //     default: 'http://localhost:5000/calculate-similarity'
+        // }
     },
     data() {
         return {
@@ -384,16 +384,16 @@ P_{ij} &= p_{j|i} + p_{i|j} - p_{j|i} \\cdot p_{i|j}
                 };
 
                 // 发送请求到后端
-                const response = await axios.post(this.apiUrl, requestData);
+                const response = await axios.post('/calculate-similarity', requestData);
 
                 // 处理响应
-                if (response.data && response.data.success) {
-                    this.resultNode = response.data.node;
+                if (response && response.success) {
+                    this.resultNode = response.node;
                     this.prepareMatrixPreview();
                     this.$message.success('相似度矩阵计算成功');
                     this.$emit('applySimilarity', this.resultNode);
                 } else {
-                    throw new Error(response.data.message || '计算失败');
+                    throw new Error(response.message || '计算失败');
                 }
             } catch (error) {
                 this.$message.error(`计算出错: ${error.message}`);

@@ -1,7 +1,7 @@
 <template>
     <div>
         <el-tabs v-model="activeTab" type="card">
-            <el-tab-pane label="相似度计算" name="similarity">
+            <el-tab-pane label="相似度矩阵" name="similarity">
                 <SimilarityMatrix :nodeData="nodeData" @applySimilarity="applyMatrix"></SimilarityMatrix>
             </el-tab-pane>
             <el-tab-pane label="协方差矩阵" name="covariance">
@@ -11,8 +11,6 @@
                 <LDAdivergence :nodeData="nodeData" @applyLDAdivergence="applyLDAdivergence" />
             </el-tab-pane>
         </el-tabs>
-
-
     </div>
 </template>
 
