@@ -10,7 +10,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/lda-tutorial")
-@CrossOrigin(origins = "http://localhost:8080") // 允许前端访问
+@CrossOrigin(origins = "*") // 允许前端访问
 public class LdaTutorialController {
 
     @Autowired

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const instance = axios.create({
-    baseURL: "http://localhost:5000", // flask 的 API 根路径
+    baseURL: "http://116.198.200.118:5000", // flask 的 API 根路径
     timeout: 100000, // 请求超时时间
 });
 

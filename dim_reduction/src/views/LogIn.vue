@@ -81,7 +81,7 @@ export default {
             // this.$router.push('/mainSelect') // 替换为你的跳转页
             const self = this;
             if (self.form.studentId != "" && self.form.password != "") {
-                axios.post('http://localhost:8080/api/student/login', this.form)
+                axios.post('http://116.198.200.118:8080/api/student/login', this.form)
                     .then(res => {
                         console.log("登录信息", res);
                         if (res.data.code === 200) {

@@ -105,7 +105,7 @@ export default {
         },
         apiUrl: {
             type: String,
-            default: 'http://localhost:5000/run'
+            default: 'http://116.198.200.118:5000/run'
         },
 
         tutorialType: {

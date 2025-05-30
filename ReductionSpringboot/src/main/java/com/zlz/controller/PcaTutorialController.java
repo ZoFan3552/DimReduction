@@ -11,7 +11,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/tutorial/pca")
-@CrossOrigin(origins = "http://localhost:8080") // 允许前端跨域访问
+@CrossOrigin(origins = "*") // 允许前端跨域访问
 public class PcaTutorialController {
 
     @Autowired

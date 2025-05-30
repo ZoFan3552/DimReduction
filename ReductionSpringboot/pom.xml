@@ -74,7 +74,6 @@
                 <version>${spring-boot.version}</version>
                 <configuration>
                     <mainClass>com.zlz.ReductionSpringbootApplication</mainClass>
-                    <skip>true</skip>
                 </configuration>
                 <executions>
                     <execution>
