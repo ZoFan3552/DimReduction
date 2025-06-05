@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/tutorial")
+@CrossOrigin(origins = "*")
 public class CodeController {
 
     @Autowired

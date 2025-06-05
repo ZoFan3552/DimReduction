@@ -55,12 +55,13 @@
                                 <thead>
                                     <tr>
                                         <th class="corner-header">特征</th>
-                                        <th v-for="(col, colIndex) in matrixColumns" :key="colIndex">{{ col }}</th>
+                                        <th v-for="(col, colIndex) in matrixColumns" :key="colIndex">{{
+                                            nodeData["feature_names"][col] }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr v-for="(row, rowIndex) in matrixColumns" :key="rowIndex">
-                                        <td class="row-header">{{ row }}</td>
+                                        <td class="row-header">{{ nodeData["feature_names"][row] }}</td>
                                         <td v-for="(col, colIndex) in matrixColumns" :key="colIndex"
                                             :class="getCellClass(covarianceMatrix[rowIndex][colIndex])">
                                             {{ formatValue(covarianceMatrix[rowIndex][colIndex]) }}
@@ -74,7 +75,7 @@
                         <div v-if="activeTab === 'heatmap' && covarianceMatrix" class="heatmap-container">
                             <div class="heatmap">
                                 <div class="heatmap-row" v-for="(row, rowIndex) in covarianceMatrix" :key="rowIndex">
-                                    <div class="row-label">{{ matrixColumns[rowIndex] }}</div>
+                                    <div class="row-label">{{ nodeData["feature_names"][rowIndex] }}</div>
                                     <div v-for="(value, colIndex) in row" :key="colIndex" class="heatmap-cell"
                                         :style="getHeatmapStyle(value)"
                                         :title="`${matrixColumns[rowIndex]}-${matrixColumns[colIndex]}: ${formatValue(value)}`">
@@ -83,7 +84,7 @@
                                 <div class="column-labels">
                                     <div class="empty-label"></div>
                                     <div class="column-label" v-for="(col, colIndex) in matrixColumns" :key="colIndex">
-                                        {{ col }}
+                                        {{ nodeData["feature_names"][col] }}
                                     </div>
                                 </div>
                             </div>

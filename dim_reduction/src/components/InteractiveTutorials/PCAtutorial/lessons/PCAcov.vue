@@ -62,16 +62,23 @@
                             <li>非对角线元素：X和Y之间的协方差</li>
                         </ul>
 
-                        <div v-if="eigenResults && eigenResults.length > 0" class="eigenvalue-section">
+                       <div v-if="eigenResults && eigenResults.length > 0" class="eigenvalue-section">
                             <p><strong>步骤3：计算特征值和特征向量</strong></p>
 
-                            <div v-for="(result, index) in eigenResults" :key="index">
-                                <p>特征值：$\lambda${{ index + 1 }} = {{ result.value.toFixed(4) }}</p>
-                                <p>
-                                    对应特征向量：$v${{ index + 1 }} =
-                                    [{{ result.vector[0].toFixed(4) }}, {{ result.vector[1].toFixed(4) }}]^T
-                                </p>
-                            </div>
+                            <p><strong>特征值：</strong></p>
+                            <ul>
+                                <li v-for="(result, index) in eigenResults" :key="'value-' + index">
+                                    $\lambda$<sub>{{ index + 1 }}</sub> = {{ result.value.toFixed(4) }}
+                                </li>
+                            </ul>
+
+                            <p><strong>对应特征向量：</strong></p>
+                            <ul>
+                                <li v-for="(result, index) in eigenResults" :key="'vector-' + index">
+                                    $v$<sub>{{ index + 1 }}</sub> = [{{ result.vector[0].toFixed(4) }}, {{
+                                    result.vector[1].toFixed(4) }}]<sup>T</sup>
+                                </li>
+                            </ul>
 
                             <p><strong>结论</strong>：这些特征向量就是主成分的方向，特征值表示沿着这些方向的方差大小。</p>
                         </div>
@@ -372,135 +379,151 @@ export default {
         },
 
         createVisualization() {
-            // 清除之前的可视化
-            d3.select(this.$refs.dataVisualization).selectAll("*").remove();
+    d3.select(this.$refs.dataVisualization).selectAll("*").remove();
 
-            // 计算适当的点大小
-            const pointRadius = Math.min(8, Math.max(4, 10 - this.parsedData.length / 2));
+    const pointRadius = Math.min(8, Math.max(4, 10 - this.parsedData.length / 2));
 
-            // 设置SVG
-            this.svg = d3.select(this.$refs.dataVisualization)
-                .append("svg")
-                .attr("width", this.width)
-                .attr("height", this.height);
+    this.svg = d3.select(this.$refs.dataVisualization)
+        .append("svg")
+        .attr("width", this.width)
+        .attr("height", this.height);
 
-            const g = this.svg.append("g")
-                .attr("transform", `translate(${this.margin.left},${this.margin.top})`);
+    const container = this.svg.append("g");
 
-            // 实际绘图区域尺寸
-            const plotWidth = this.width - this.margin.left - this.margin.right;
-            const plotHeight = this.height - this.margin.top - this.margin.bottom;
+    const g = container.append("g")
+        .attr("transform", `translate(${this.margin.left},${this.margin.top})`);
 
-            // 计算数据范围
-            const xExtent = d3.extent(this.parsedData, d => d[0]);
-            const yExtent = d3.extent(this.parsedData, d => d[1]);
+    const plotWidth = this.width - this.margin.left - this.margin.right;
+    const plotHeight = this.height - this.margin.top - this.margin.bottom;
 
-            // 考虑特征向量，扩展范围
-            const maxEigenValue = Math.max(this.eigenResults[0].value, this.eigenResults[1].value);
-            const scale = Math.sqrt(maxEigenValue) * 2;
+    const xExtent = d3.extent(this.parsedData, d => d[0]);
+    const yExtent = d3.extent(this.parsedData, d => d[1]);
 
-            // 添加一些边距
-            const xRange = [
-                Math.min(xExtent[0], this.meanX - scale),
-                Math.max(xExtent[1], this.meanX + scale)
-            ];
-            const yRange = [
-                Math.min(yExtent[0], this.meanY - scale),
-                Math.max(yExtent[1], this.meanY + scale)
-            ];
+    const maxEigenValue = Math.max(this.eigenResults[0].value, this.eigenResults[1].value);
+    const scale = Math.sqrt(maxEigenValue) * 2;
 
-            // 创建X和Y比例尺
-            const xScale = d3.scaleLinear()
-                .domain(xRange)
-                .range([0, plotWidth])
-                .nice();
+    const xRange = [
+        Math.min(xExtent[0], this.meanX - scale),
+        Math.max(xExtent[1], this.meanX + scale)
+    ];
+    const yRange = [
+        Math.min(yExtent[0], this.meanY - scale),
+        Math.max(yExtent[1], this.meanY + scale)
+    ];
 
-            const yScale = d3.scaleLinear()
-                .domain(yRange)
-                .range([plotHeight, 0])
-                .nice();
+    const xScale = d3.scaleLinear().domain(xRange).range([0, plotWidth]).nice();
+    const yScale = d3.scaleLinear().domain(yRange).range([plotHeight, 0]).nice();
 
-            // 添加X和Y轴
-            g.append("g")
-                .attr("transform", `translate(0,${yScale(0)})`)
-                .call(d3.axisBottom(xScale));
+    const xAxis = d3.axisBottom(xScale);
+    const yAxis = d3.axisLeft(yScale);
 
-            g.append("g")
-                .attr("transform", `translate(${xScale(0)},0)`)
-                .call(d3.axisLeft(yScale));
+    const xAxisGroup = g.append("g")
+        .attr("class", "x-axis")
+        .attr("transform", `translate(0,${yScale(0)})`)
+        .call(xAxis);
 
-            // 添加X和Y轴标签
-            g.append("text")
-                .attr("x", plotWidth)
-                .attr("y", yScale(0) + 20)
-                .style("text-anchor", "end")
-                .text("X轴");
+    const yAxisGroup = g.append("g")
+        .attr("class", "y-axis")
+        .attr("transform", `translate(${xScale(0)},0)`)
+        .call(yAxis);
 
-            g.append("text")
-                .attr("x", xScale(0) - 10)
-                .attr("y", 10)
-                .style("text-anchor", "end")
-                .text("Y轴");
+    // 轴标签
+    const xLabel = g.append("text")
+        .attr("class", "x-label")
+        .attr("x", plotWidth)
+        .attr("y", yScale(0) + 20)
+        .style("text-anchor", "end")
+        .text("X轴");
 
-            // 绘制数据点
-            g.selectAll(".data-point")
-                .data(this.parsedData)
-                .enter()
-                .append("circle")
-                .attr("class", "data-point")
-                .attr("cx", d => xScale(d[0]))
-                .attr("cy", d => yScale(d[1]))
-                .attr("r", pointRadius)
-                .style("fill", "#69b3a2")
-                .style("opacity", 0.7);
+    const yLabel = g.append("text")
+        .attr("class", "y-label")
+        .attr("x", xScale(0) - 10)
+        .attr("y", 10)
+        .style("text-anchor", "end")
+        .text("Y轴");
 
-            // 绘制均值点
-            g.append("circle")
-                .attr("cx", xScale(this.meanX))
-                .attr("cy", yScale(this.meanY))
-                .attr("r", pointRadius + 1)
-                .style("fill", "#ff7700")
-                .style("stroke", "black")
-                .style("stroke-width", 1);
+    // 绘制数据点
+    const points = g.selectAll(".data-point")
+        .data(this.parsedData)
+        .enter()
+        .append("circle")
+        .attr("class", "data-point")
+        .attr("r", pointRadius)
+        .style("fill", "#69b3a2")
+        .style("opacity", 0.7);
 
-            // 绘制特征向量
-            const scaleFactor = 1.5 * scale;
+    // 均值点
+    const meanPoint = g.append("circle")
+        .attr("class", "mean-point")
+        .attr("r", pointRadius + 1)
+        .style("fill", "#ff7700")
+        .style("stroke", "black")
+        .style("stroke-width", 1);
 
-            // 第一特征向量（主成分）
-            g.append("line")
-                .attr("x1", xScale(this.meanX - scaleFactor * this.eigenResults[0].vector[0]))
-                .attr("y1", yScale(this.meanY - scaleFactor * this.eigenResults[0].vector[1]))
-                .attr("x2", xScale(this.meanX + scaleFactor * this.eigenResults[0].vector[0]))
-                .attr("y2", yScale(this.meanY + scaleFactor * this.eigenResults[0].vector[1]))
-                .style("stroke", "red")
-                .style("stroke-width", 2)
-                .style("stroke-dasharray", "5,5");
+    // 特征向量
+    const scaleFactor = 1.5 * scale;
+    const evLines = g.selectAll(".eigen-line")
+        .data(this.eigenResults)
+        .enter()
+        .append("line")
+        .attr("class", (d, i) => `eigen-line eigen-line-${i}`)
+        .style("stroke", (d, i) => i === 0 ? "red" : "blue")
+        .style("stroke-width", 2)
+        .style("stroke-dasharray", "5,5");
 
-            // 第二特征向量
-            g.append("line")
-                .attr("x1", xScale(this.meanX - scaleFactor * this.eigenResults[1].vector[0]))
-                .attr("y1", yScale(this.meanY - scaleFactor * this.eigenResults[1].vector[1]))
-                .attr("x2", xScale(this.meanX + scaleFactor * this.eigenResults[1].vector[0]))
-                .attr("y2", yScale(this.meanY + scaleFactor * this.eigenResults[1].vector[1]))
-                .style("stroke", "blue")
-                .style("stroke-width", 2)
-                .style("stroke-dasharray", "5,5");
+    const evLabels = g.selectAll(".eigen-label")
+        .data(this.eigenResults)
+        .enter()
+        .append("text")
+        .attr("class", "eigen-label")
+        .attr("dx", 10)
+        .style("fill", (d, i) => i === 0 ? "red" : "blue")
+        .text((d, i) => i === 0 ? "第一主成分" : "第二主成分");
 
-            // 添加标签
-            g.append("text")
-                .attr("x", xScale(this.meanX + scaleFactor * this.eigenResults[0].vector[0]))
-                .attr("y", yScale(this.meanY + scaleFactor * this.eigenResults[0].vector[1]))
-                .attr("dx", 10)
-                .style("fill", "red")
-                .text("第一主成分");
+    // 初始化位置
+    function updateElements(newXScale, newYScale) {
+        xAxisGroup.call(xAxis.scale(newXScale));
+        yAxisGroup.call(yAxis.scale(newYScale));
 
-            g.append("text")
-                .attr("x", xScale(this.meanX + scaleFactor * this.eigenResults[1].vector[0]))
-                .attr("y", yScale(this.meanY + scaleFactor * this.eigenResults[1].vector[1]))
-                .attr("dx", 10)
-                .style("fill", "blue")
-                .text("第二主成分");
-        },
+        xAxisGroup.attr("transform", `translate(0,${newYScale(0)})`);
+        yAxisGroup.attr("transform", `translate(${newXScale(0)},0)`);
+
+        xLabel.attr("x", plotWidth).attr("y", newYScale(0) + 20);
+        yLabel.attr("x", newXScale(0) - 10).attr("y", 10);
+
+        points
+            .attr("cx", d => newXScale(d[0]))
+            .attr("cy", d => newYScale(d[1]));
+
+        meanPoint
+            .attr("cx", newXScale(this.meanX))
+            .attr("cy", newYScale(this.meanY));
+
+        evLines
+            .attr("x1", d => newXScale(this.meanX - scaleFactor * d.vector[0]))
+            .attr("y1", d => newYScale(this.meanY - scaleFactor * d.vector[1]))
+            .attr("x2", d => newXScale(this.meanX + scaleFactor * d.vector[0]))
+            .attr("y2", d => newYScale(this.meanY + scaleFactor * d.vector[1]));
+
+        evLabels
+            .attr("x", d => newXScale(this.meanX + scaleFactor * d.vector[0]))
+            .attr("y", d => newYScale(this.meanY + scaleFactor * d.vector[1]));
+    }
+
+    // 初始化位置
+    updateElements.call(this, xScale, yScale);
+
+    // 缩放行为
+    const zoom = d3.zoom()
+        .scaleExtent([0.5, 10])
+        .on("zoom", (event) => {
+            const newXScale = event.transform.rescaleX(xScale);
+            const newYScale = event.transform.rescaleY(yScale);
+            updateElements.call(this, newXScale, newYScale);
+        });
+
+    this.svg.call(zoom);
+},
 
         checkUnderstanding() {
             this.understandingAttempts++;

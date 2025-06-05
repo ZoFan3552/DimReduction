@@ -9,7 +9,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/student")
-@CrossOrigin
+@CrossOrigin(origins = "*")
 public class StudentController {
     @Autowired
     private StudentService studentService;

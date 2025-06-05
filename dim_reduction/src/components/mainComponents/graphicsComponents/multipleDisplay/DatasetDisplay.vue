@@ -122,12 +122,7 @@
                             </el-button>
                         </el-tooltip>
                     </div>
-
-                    <div class="chart-container" :class="displayMode">
-                        <div ref="chartRef" class="d3-chart"></div>
-                    </div>
-
-                    <div class="legend-container">
+<div class="legend-container">
                         <div class="legend-title">标签图例:</div>
                         <div class="legend-items">
                             <div v-for="(color, label) in colorMap" :key="label" class="legend-item">
@@ -136,6 +131,11 @@
                             </div>
                         </div>
                     </div>
+                    <div class="chart-container" :class="displayMode">
+                        <div ref="chartRef" class="d3-chart"></div>
+                    </div>
+
+                    
                 </el-card>
             </div>
         </div>
@@ -730,8 +730,8 @@ export default {
 }
 
 .legend-container {
-    margin-top: 20px;
-    padding: 10px;
+    /*margin-top: 20px;
+    padding: 10px;*/
     border-top: 1px solid #EBEEF5;
     max-height: 150px;
     overflow-y: auto;

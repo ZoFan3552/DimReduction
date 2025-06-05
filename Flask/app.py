@@ -20,6 +20,7 @@ from node_operations.data_import import dataset_api
 from node_operations.gradient_descent import gradient_api
 
 app = Flask(__name__)
+CORS(app)
 
 app.register_blueprint(dataset_api)
 app.register_blueprint(gradient_api)
@@ -31,7 +32,10 @@ app.register_blueprint(preprocess_api)
 app.register_blueprint(LDAdiv_api)
 app.register_blueprint(projection_api)
 
-CORS(app, origins='*')
+
+@app.route('/api/hello', methods=['GET'])
+def hello():
+    return jsonify({"message": "你好，这是跨域返回的数据！"})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0",port=5000)

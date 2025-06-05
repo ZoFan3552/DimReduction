@@ -31,7 +31,7 @@
             <div class="small-box" :class="{ active: isLogin }">
                 <div class="small-contain" key="smallContainRegister" v-if="isLogin">
                     <div class="stitle">你好，朋友!</div>
-                    <p class="scontent">开始注册，和我们一起旅行</p>
+                    <p class="scontent">让我们开始数据降维算法可视化教学实验</p>
                     <!-- <button class="sbutton" @click="changeType">注册</button> -->
                 </div>
                 <div class="small-contain" key="smallContainLogin" v-else>

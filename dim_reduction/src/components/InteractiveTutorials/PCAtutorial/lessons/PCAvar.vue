@@ -12,17 +12,17 @@
                     <div class="control-item">
                         <span>X方向方差: {{ varianceX.toFixed(2) }}</span>
                         <el-slider v-model="varianceX" :min="0.5" :max="5" :step="0.1"
-                            @change="updateVisualization"></el-slider>
+                            @input="updateVisualization"></el-slider>
                     </div>
                     <div class="control-item">
                         <span>Y方向方差: {{ varianceY.toFixed(2) }}</span>
                         <el-slider v-model="varianceY" :min="0.5" :max="5" :step="0.1"
-                            @change="updateVisualization"></el-slider>
+                            @input="updateVisualization"></el-slider>
                     </div>
                     <div class="control-item">
                         <span>相关系数: {{ correlation.toFixed(2) }}</span>
                         <el-slider v-model="correlation" :min="-0.9" :max="0.9" :step="0.1"
-                            @change="updateVisualization"></el-slider>
+                            @input="updateVisualization"></el-slider>
                     </div>
                 </div>
 

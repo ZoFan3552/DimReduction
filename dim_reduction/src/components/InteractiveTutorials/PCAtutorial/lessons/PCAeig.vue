@@ -329,31 +329,27 @@ export default {
         },
 
         drawVisualization() {
-            // 清除之前的可视化
             d3.select(this.$refs.eigenVisualization).selectAll("*").remove();
 
-            // 设置SVG
             this.svg = d3.select(this.$refs.eigenVisualization)
                 .append("svg")
                 .attr("width", this.width)
                 .attr("height", this.height);
 
-            const g = this.svg.append("g")
+            const container = this.svg.append("g");
+
+            const g = container.append("g")
                 .attr("transform", `translate(${this.margin.left},${this.margin.top})`);
 
-            // 实际绘图区域尺寸
             const plotWidth = this.width - this.margin.left - this.margin.right;
             const plotHeight = this.height - this.margin.top - this.margin.bottom;
 
-            // 计算数据范围
             const xExtent = d3.extent(this.points, d => d[0]);
             const yExtent = d3.extent(this.points, d => d[1]);
 
-            // 确保比例尺是对称的，并添加一些边距
             const maxX = Math.max(Math.abs(xExtent[0]), Math.abs(xExtent[1])) * 1.2;
             const maxY = Math.max(Math.abs(yExtent[0]), Math.abs(yExtent[1])) * 1.2;
 
-            // 创建X和Y比例尺
             const xScale = d3.scaleLinear()
                 .domain([-maxX, maxX])
                 .range([0, plotWidth]);
@@ -362,16 +358,19 @@ export default {
                 .domain([-maxY, maxY])
                 .range([plotHeight, 0]);
 
-            // 添加X和Y轴
-            g.append("g")
+            const xAxis = d3.axisBottom(xScale).ticks(5);
+            const yAxis = d3.axisLeft(yScale).ticks(5);
+
+            const xAxisGroup = g.append("g")
+                .attr("class", "x-axis")
                 .attr("transform", `translate(0,${yScale(0)})`)
-                .call(d3.axisBottom(xScale).ticks(5));
+                .call(xAxis);
 
-            g.append("g")
+            const yAxisGroup = g.append("g")
+                .attr("class", "y-axis")
                 .attr("transform", `translate(${xScale(0)},0)`)
-                .call(d3.axisLeft(yScale).ticks(5));
+                .call(yAxis);
 
-            // 绘制数据点
             g.selectAll(".data-point")
                 .data(this.points)
                 .enter()
@@ -383,17 +382,21 @@ export default {
                 .style("fill", "#69b3a2")
                 .style("opacity", 0.5);
 
-            // 绘制特征向量
             const origin = [0, 0];
             const scaleFactor = Math.max(maxX, maxY) * 0.7;
 
-            // 第一特征向量（红色）
             const ev1End = [
                 origin[0] + this.eigenvectors[0][0] * scaleFactor * Math.sqrt(this.eigenvalues[0]),
                 origin[1] + this.eigenvectors[0][1] * scaleFactor * Math.sqrt(this.eigenvalues[0])
             ];
 
+            const ev2End = [
+                origin[0] + this.eigenvectors[1][0] * scaleFactor * Math.sqrt(this.eigenvalues[1]),
+                origin[1] + this.eigenvectors[1][1] * scaleFactor * Math.sqrt(this.eigenvalues[1])
+            ];
+
             g.append("line")
+                .attr("class", "ev1")
                 .attr("x1", xScale(origin[0]))
                 .attr("y1", yScale(origin[1]))
                 .attr("x2", xScale(ev1End[0]))
@@ -402,13 +405,8 @@ export default {
                 .style("stroke-width", 2)
                 .style("stroke-dasharray", "5,5");
 
-            // 第二特征向量（蓝色）
-            const ev2End = [
-                origin[0] + this.eigenvectors[1][0] * scaleFactor * Math.sqrt(this.eigenvalues[1]),
-                origin[1] + this.eigenvectors[1][1] * scaleFactor * Math.sqrt(this.eigenvalues[1])
-            ];
-
             g.append("line")
+                .attr("class", "ev2")
                 .attr("x1", xScale(origin[0]))
                 .attr("y1", yScale(origin[1]))
                 .attr("x2", xScale(ev2End[0]))
@@ -417,8 +415,8 @@ export default {
                 .style("stroke-width", 2)
                 .style("stroke-dasharray", "5,5");
 
-            // 添加标签
             g.append("text")
+                .attr("class", "ev1-label")
                 .attr("x", xScale(ev1End[0]))
                 .attr("y", yScale(ev1End[1]))
                 .attr("dx", 5)
@@ -426,27 +424,75 @@ export default {
                 .text("第一特征向量 (λ₁)");
 
             g.append("text")
+                .attr("class", "ev2-label")
                 .attr("x", xScale(ev2End[0]))
                 .attr("y", yScale(ev2End[1]))
                 .attr("dx", 5)
                 .style("fill", "blue")
                 .text("第二特征向量 (λ₂)");
 
-            // 绘制椭圆表示数据分布
             const confidenceEllipse = this.calculateConfidenceEllipse(1.5);
 
-            // 创建椭圆路径
             const ellipsePath = d3.line()
                 .x(d => xScale(d[0]))
                 .y(d => yScale(d[1]))
                 .curve(d3.curveCardinalClosed);
 
             g.append("path")
+                .attr("class", "ellipse")
                 .attr("d", ellipsePath(confidenceEllipse))
                 .style("stroke", "#333")
                 .style("stroke-width", 1)
                 .style("fill", "none")
                 .style("stroke-dasharray", "3,3");
+
+            // 添加缩放
+            const zoom = d3.zoom()
+                .scaleExtent([0.5, 10])
+                .on("zoom", (event) => {
+                    const transform = event.transform;
+
+                    // 更新缩放后的比例尺
+                    const newXScale = transform.rescaleX(xScale);
+                    const newYScale = transform.rescaleY(yScale);
+
+                    // 更新坐标轴
+                    xAxisGroup.call(xAxis.scale(newXScale));
+                    yAxisGroup.call(yAxis.scale(newYScale));
+
+                    // 更新图形元素
+                    g.selectAll(".data-point")
+                        .attr("cx", d => newXScale(d[0]))
+                        .attr("cy", d => newYScale(d[1]));
+
+                    g.selectAll(".ev1")
+                        .attr("x1", newXScale(origin[0]))
+                        .attr("y1", newYScale(origin[1]))
+                        .attr("x2", newXScale(ev1End[0]))
+                        .attr("y2", newYScale(ev1End[1]));
+
+                    g.selectAll(".ev2")
+                        .attr("x1", newXScale(origin[0]))
+                        .attr("y1", newYScale(origin[1]))
+                        .attr("x2", newXScale(ev2End[0]))
+                        .attr("y2", newYScale(ev2End[1]));
+
+                    g.selectAll(".ev1-label")
+                        .attr("x", newXScale(ev1End[0]))
+                        .attr("y", newYScale(ev1End[1]));
+
+                    g.selectAll(".ev2-label")
+                        .attr("x", newXScale(ev2End[0]))
+                        .attr("y", newYScale(ev2End[1]));
+
+                    g.selectAll(".ellipse")
+                        .attr("d", d3.line()
+                            .x(d => newXScale(d[0]))
+                            .y(d => newYScale(d[1]))
+                            .curve(d3.curveCardinalClosed)(confidenceEllipse));
+                });
+
+            this.svg.call(zoom);
         },
 
         calculateConfidenceEllipse(scale = 1) {

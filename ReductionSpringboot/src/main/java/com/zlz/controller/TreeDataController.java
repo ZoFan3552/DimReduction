@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/treeData")
+@CrossOrigin(origins = "*")
 public class TreeDataController {
 
     @Autowired
