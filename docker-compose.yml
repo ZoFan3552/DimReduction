@@ -1,0 +1,75 @@
+services:
+  # MySQL 数据库服务
+  mysql:
+    image: dockerproxy.net/library/mysql:8.0
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppassword
+    ports:
+      - "3306:3306"
+    volumes:
+      # 挂载sql文件夹，MySQL会自动执行其中的backup.sql
+      - ./sql:/docker-entrypoint-initdb.d
+      # 数据持久化
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./backend  # 假设Spring Boot项目在此目录
+      dockerfile: Dockerfile
+    container_name: backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    environment:
+      # Spring Boot连接MySQL的配置
+      - SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/dim_reduction?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=appuser
+      - SPRING_DATASOURCE_PASSWORD=apppassword
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  calculator:
+    build:
+      context: ./calculator  # 假设Flask项目在此目录
+      dockerfile: Dockerfile
+    container_name: calculator
+    ports:
+      - "5000:5000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend  # 假设Vite项目在此目录
+      dockerfile: Dockerfile
+    container_name: vite_app
+    ports:
+      - "7005:7005"
+    depends_on:
+      - backend
+      - calculator
+    restart: unless-stopped
+    networks:
+      - app-network
+
+# 数据卷定义
+volumes:
+  mysql_data:
+    driver: local
+
+# 网络定义
+networks:
+  app-network:
+    driver: bridge

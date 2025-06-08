@@ -1,0 +1,24 @@
+# 忽略 Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 忽略环境配置
+.env
+*.env
+
+# 忽略虚拟环境文件夹
+venv/
+.venv/
+.env/
+.env.bak/
+*.bak
+
+# 忽略 Git 文件
+.git
+.gitignore
+
+# 忽略 Docker 自身文件
+Dockerfile
+docker-compose.yml
