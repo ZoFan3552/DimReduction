@@ -32,10 +32,5 @@ app.register_blueprint(preprocess_api)
 app.register_blueprint(LDAdiv_api)
 app.register_blueprint(projection_api)
 
-
-@app.route('/api/hello', methods=['GET'])
-def hello():
-    return jsonify({"message": "你好，这是跨域返回的数据！"})
-
 if __name__ == "__main__":
     app.run(host="0.0.0.0",port=5000)

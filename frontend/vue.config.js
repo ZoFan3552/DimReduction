@@ -13,11 +13,4 @@ module.exports = defineConfig({
       .loader('raw-loader')
       .end()
   },
-  // css: {
-  //   loaderOptions: {
-  //     scss: {
-  //       implementation: require('sass'), // 使用 Dart Sass
-  //     }
-  //   }
-  // },
 })
