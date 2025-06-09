@@ -1,5 +1,4 @@
 services:
-  # MySQL 数据库服务
   mysql:
     image: mysql:8.0
     container_name: mysql
@@ -9,9 +8,7 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      # 挂载sql文件夹，MySQL会自动执行其中的backup.sql
       - ./sql:/docker-entrypoint-initdb.d
-      # 数据持久化
       - mysql_data:/var/lib/mysql
     restart: unless-stopped
     networks:
@@ -61,12 +58,10 @@ services:
     networks:
       - app-network
 
-# 数据卷定义
 volumes:
   mysql_data:
     driver: local
 
-# 网络定义
 networks:
   app-network:
     driver: bridge
