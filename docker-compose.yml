@@ -1,12 +1,11 @@
 services:
   # MySQL 数据库服务
   mysql:
-    image: dockerproxy.net/library/mysql:8.0
-    container_name: mysql_db
+    image: mysql:8.0
+    container_name: mysql
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_USER: appuser
-      MYSQL_PASSWORD: apppassword
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=dim_reduction
     ports:
       - "3306:3306"
     volumes:
@@ -20,7 +19,7 @@ services:
 
   backend:
     build:
-      context: ./backend  # 假设Spring Boot项目在此目录
+      context: ./backend  
       dockerfile: Dockerfile
     container_name: backend
     ports:
@@ -28,18 +27,16 @@ services:
     depends_on:
       - mysql
     environment:
-      # Spring Boot连接MySQL的配置
-      - SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/dim_reduction?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-      - SPRING_DATASOURCE_USERNAME=appuser
-      - SPRING_DATASOURCE_PASSWORD=apppassword
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/dim_reduction?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
     restart: unless-stopped
     networks:
       - app-network
 
   calculator:
     build:
-      context: ./calculator  # 假设Flask项目在此目录
+      context: ./calculator  
       dockerfile: Dockerfile
     container_name: calculator
     ports:
@@ -52,9 +49,9 @@ services:
 
   frontend:
     build:
-      context: ./frontend  # 假设Vite项目在此目录
+      context: ./frontend  
       dockerfile: Dockerfile
-    container_name: vite_app
+    container_name: frontend
     ports:
       - "7005:7005"
     depends_on:
