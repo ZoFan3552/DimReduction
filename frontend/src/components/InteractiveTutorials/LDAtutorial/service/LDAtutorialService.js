@@ -1,5 +1,5 @@
 // src/api/ldaTutorialService.js
-import axios from '@/utils/myAxios';
+import axios from '@/utils/backendAxios';
 
 /**
  * LDA教程进度管理服务

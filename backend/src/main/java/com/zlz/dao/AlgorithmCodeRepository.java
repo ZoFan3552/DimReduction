@@ -1,4 +1,4 @@
-package com.zlz.Dao;
+package com.zlz.dao;
 
 import com.zlz.pojo.AlgorithmCode;
 import org.springframework.data.jpa.repository.JpaRepository;

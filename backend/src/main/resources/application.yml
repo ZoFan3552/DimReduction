@@ -3,7 +3,8 @@ server:
 
 spring:
   application:
-    name: ReductionSpringboot
+    name: backend
+
 
   # 数据库配置
   datasource:
@@ -27,3 +28,11 @@ logging:
     com.zlz: debug
     org.springframework: info
     org.hibernate: info
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+

@@ -2,7 +2,7 @@ package com.zlz.controller;
 
 import com.zlz.pojo.PcaTutorialProgress;
 import com.zlz.service.PcaTutorialService;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,8 +14,11 @@ import java.util.Map;
 @CrossOrigin(origins = "*") // 允许前端跨域访问
 public class PcaTutorialController {
 
-    @Autowired
-    private PcaTutorialService pcaTutorialService;
+    private final PcaTutorialService pcaTutorialService;
+
+    public PcaTutorialController(PcaTutorialService pcaTutorialService) {
+        this.pcaTutorialService = pcaTutorialService;
+    }
 
     /**
      * 获取用户教程进度
@@ -23,6 +26,7 @@ public class PcaTutorialController {
      * @return 用户的教程进度数据
      */
     @GetMapping("/progress/{userId}")
+    @Operation(summary = "获取用户教程进度")
     public ResponseEntity<?> getUserProgress(@PathVariable String userId) {
         try {
             PcaTutorialProgress progress = pcaTutorialService.getUserProgress(userId);
@@ -40,6 +44,7 @@ public class PcaTutorialController {
      * @return 保存结果
      */
     @PostMapping("/progress")
+    @Operation(summary = "保存用户教程进度")
     public ResponseEntity<?> saveUserProgress(@RequestBody PcaTutorialProgress progressData) {
         try {
             PcaTutorialProgress savedProgress = pcaTutorialService.saveUserProgress(progressData);
@@ -57,6 +62,7 @@ public class PcaTutorialController {
      * @return 更新结果
      */
     @PatchMapping("/progress/answer")
+    @Operation(summary = "更新特定章节的回答")
     public ResponseEntity<?> updateSegmentAnswer(@RequestBody Map<String, String> requestData) {
         try {
             String userId = requestData.get("userId");
@@ -81,6 +87,7 @@ public class PcaTutorialController {
      * @return 更新结果
      */
     @PatchMapping("/progress/complete")
+    @Operation(summary = "标记章节为已完成")
     public ResponseEntity<?> markSegmentComplete(@RequestBody Map<String, String> requestData) {
         try {
             String userId = requestData.get("userId");

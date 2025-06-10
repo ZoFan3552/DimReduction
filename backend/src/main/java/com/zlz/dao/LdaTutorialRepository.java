@@ -1,4 +1,4 @@
-package com.zlz.Dao;
+package com.zlz.dao;
 
 import com.zlz.pojo.LdaTutorialProgress;
 import org.springframework.data.jpa.repository.JpaRepository;

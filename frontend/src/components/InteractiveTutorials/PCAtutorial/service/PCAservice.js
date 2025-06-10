@@ -1,5 +1,5 @@
 // /service/PCAservice.js
-import axios from '@/utils/myAxios';
+import axios from '@/utils/backendAxios';
 
 // PCA教程进度服务
 export const tutorialProgressService = {

@@ -1,7 +1,7 @@
 package com.zlz.utils;
 
 
-import com.zlz.Dao.AlgorithmCodeRepository;
+import com.zlz.dao.AlgorithmCodeRepository;
 import com.zlz.pojo.AlgorithmCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -13,8 +13,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class DataInitializer implements CommandLineRunner {
 
-    @Autowired
-    private AlgorithmCodeRepository algorithmCodeRepository;
+    private final AlgorithmCodeRepository algorithmCodeRepository;
+
+    public DataInitializer(AlgorithmCodeRepository algorithmCodeRepository) {
+        this.algorithmCodeRepository = algorithmCodeRepository;
+    }
 
     @Override
     public void run(String... args) throws Exception {

@@ -1,7 +1,9 @@
 import axios from "axios";
 
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+
 const instance = axios.create({
-    baseURL: "http://116.198.200.118:5000", // flask 的 API 根路径
+    baseURL: `${apiBaseUrl}:5000`, // flask 的 API 根路径
     timeout: 100000, // 请求超时时间
 });
 

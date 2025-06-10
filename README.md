@@ -7,8 +7,8 @@
 > 若没有，请参照[Linux | Docker Docs](https://docs.docker.com/desktop/setup/install/linux/) （或 [Windows | Docker Docs](https://docs.docker.com/desktop/setup/install/windows-install/)）进行安装
 
 1.  拉取项目到本地，在终端执行  `git clone https://github.com/ZoFan3552/DimReduction`
-2.  执行`cd DimReduction`
-3.  执行 `docker compose up -d --build`
+2.  执行`cd DimReduction\frontend`修改 `.env` 文件中的 API  路径为你的服务器地址，若是本地环境则更改为 localhost
+3.  执行 `cd .. & docker compose up -d --build`
 
 ### 开发环境部署
 
@@ -18,6 +18,8 @@
 
 1. 执行 `mvn clean package`
 2. 执行 `java -jar target/ReductionSpringboot-0.0.1-SNAPSHOT.jar`
+
+可访问`http://localhost:8080/swagger-ui/index.html`访问 API 文档
 
 #### 启动 calculator
 

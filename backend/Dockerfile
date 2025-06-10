@@ -1,4 +1,4 @@
-# 使用官方 Maven 镜像进行构建，包含 JDK 17，可按需更换版本
+# 使用官方 Maven 镜像进行构建，包含 JDK 11，可按需更换版本
 FROM maven:3.9.6-eclipse-temurin-11 AS builder
 
 # 设置国内 Maven 镜像源

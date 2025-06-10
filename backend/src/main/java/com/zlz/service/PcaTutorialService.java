@@ -1,6 +1,6 @@
 package com.zlz.service;
 
-import com.zlz.Dao.PcaTutorialRepository;
+import com.zlz.dao.PcaTutorialRepository;
 import com.zlz.pojo.PcaTutorialProgress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,8 +13,7 @@ import java.util.Optional;
 @Service
 public class PcaTutorialService {
 
-    @Autowired
-    private PcaTutorialRepository pcaTutorialRepository;
+    private final PcaTutorialRepository pcaTutorialRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -30,6 +29,10 @@ public class PcaTutorialService {
             "pca-limitations",
             "practical-example"
     };
+
+    public PcaTutorialService(PcaTutorialRepository pcaTutorialRepository) {
+        this.pcaTutorialRepository = pcaTutorialRepository;
+    }
 
     /**
      * 获取用户教程进度

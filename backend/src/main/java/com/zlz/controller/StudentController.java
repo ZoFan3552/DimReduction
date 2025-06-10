@@ -1,6 +1,7 @@
 package com.zlz.controller;
 
 import com.zlz.service.StudentService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,10 +12,14 @@ import java.util.Map;
 @RequestMapping("/api/student")
 @CrossOrigin(origins = "*")
 public class StudentController {
-    @Autowired
-    private StudentService studentService;
+    private final StudentService studentService;
+
+    public StudentController(StudentService studentService) {
+        this.studentService = studentService;
+    }
 
     @PostMapping("/login")
+    @Operation(summary = "学生登录")
     public Map<String, Object> login(@RequestBody Map<String, String> loginData) {
         String studentId = loginData.get("studentId");
         String password = loginData.get("password");

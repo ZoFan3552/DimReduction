@@ -4,6 +4,9 @@ package com.zlz.controller;
 import com.zlz.pojo.AlgorithmCodeResponse;
 import com.zlz.pojo.SaveCodeRequest;
 import com.zlz.service.CodeService;
+import io.swagger.v3.oas.annotations.Operation;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,13 +16,17 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "*")
 public class CodeController {
 
-    @Autowired
-    private CodeService tutorialService;
+    private final CodeService tutorialService;
+
+    public CodeController(CodeService tutorialService) {
+        this.tutorialService = tutorialService;
+    }
 
     /**
      * 获取用户保存的代码
      */
     @GetMapping("/user-code")
+    @Operation(summary = "获取用户保存记录")
     public ResponseEntity<AlgorithmCodeResponse> getUserCode(
             @RequestParam String userId,
             @RequestParam String algorithmType) {
@@ -36,6 +43,7 @@ public class CodeController {
      * 获取标准算法代码
      */
     @GetMapping("/standard-code")
+    @Operation(summary = "获取标准算法")
     public ResponseEntity<AlgorithmCodeResponse> getStandardCode(
             @RequestParam String algorithmType) {
 
@@ -51,6 +59,7 @@ public class CodeController {
      * 保存用户代码
      */
     @PostMapping("/save-code")
+    @Operation(summary = "保存用户代码")
     public ResponseEntity<?> saveUserCode(@RequestBody SaveCodeRequest request) {
         boolean success = tutorialService.saveUserCode(
                 request.getUserId(),
@@ -66,6 +75,8 @@ public class CodeController {
     }
 
     // 保存响应内部类
+    @Setter
+    @Getter
     public static class SaveResponse {
         private boolean success;
         private String message;
@@ -75,20 +86,5 @@ public class CodeController {
             this.message = message;
         }
 
-        public boolean isSuccess() {
-            return success;
-        }
-
-        public void setSuccess(boolean success) {
-            this.success = success;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public void setMessage(String message) {
-            this.message = message;
-        }
     }
 }

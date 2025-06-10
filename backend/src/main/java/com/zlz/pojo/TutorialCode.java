@@ -1,8 +1,13 @@
 package com.zlz.pojo;
 
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "tutorial_code")
 public class TutorialCode {
@@ -17,6 +22,7 @@ public class TutorialCode {
     @Column(name = "pca_code", columnDefinition = "TEXT")
     private String pcaCode;
 
+    // Getters and Setters
     @Column(name = "lda_code", columnDefinition = "TEXT")
     private String ldaCode;
 
@@ -28,51 +34,4 @@ public class TutorialCode {
     @Column(name = "umap_code", columnDefinition = "TEXT")
     private String umapCode;
 
-    // Getters and Setters
-    public String getLdaCode() {
-        return ldaCode;
-    }
-
-    public void setLdaCode(String ldaCode) {
-        this.ldaCode = ldaCode;
-    }
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public String getPcaCode() {
-        return pcaCode;
-    }
-
-    public void setPcaCode(String pcaCode) {
-        this.pcaCode = pcaCode;
-    }
-
-    public String getTsneCode() {
-        return tsneCode;
-    }
-
-    public void setTsneCode(String tsneCode) {
-        this.tsneCode = tsneCode;
-    }
-
-    public String getUmapCode() {
-        return umapCode;
-    }
-
-    public void setUmapCode(String umapCode) {
-        this.umapCode = umapCode;
-    }
 }

@@ -1,19 +1,21 @@
 package com.zlz.service;
 
 
-import com.zlz.Dao.TreeDataRepository;
+import com.zlz.dao.TreeDataRepository;
 import com.zlz.pojo.TreeData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.Optional;
 
 @Service
 public class TreeDataService {
 
-    @Autowired
-    private TreeDataRepository treeDataRepository;
+    private final TreeDataRepository treeDataRepository;
+
+    public TreeDataService(TreeDataRepository treeDataRepository) {
+        this.treeDataRepository = treeDataRepository;
+    }
 
     public TreeData getTreeData(String userId, String algorithmType) {
         return treeDataRepository.findByUserIdAndAlgorithmType(userId, algorithmType)

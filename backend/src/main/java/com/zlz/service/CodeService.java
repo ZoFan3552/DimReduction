@@ -1,7 +1,7 @@
 package com.zlz.service;
 
-import com.zlz.Dao.AlgorithmCodeRepository;
-import com.zlz.Dao.CodeRepository;
+import com.zlz.dao.AlgorithmCodeRepository;
+import com.zlz.dao.CodeRepository;
 import com.zlz.pojo.AlgorithmCode;
 import com.zlz.pojo.TutorialCode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,11 +12,14 @@ import java.util.Optional;
 @Service
 public class CodeService {
 
-    @Autowired
-    private CodeRepository tutorialCodeRepository;
+    private final CodeRepository tutorialCodeRepository;
 
-    @Autowired
-    private AlgorithmCodeRepository algorithmCodeRepository;
+    private final AlgorithmCodeRepository algorithmCodeRepository;
+
+    public CodeService(CodeRepository tutorialCodeRepository, AlgorithmCodeRepository algorithmCodeRepository) {
+        this.tutorialCodeRepository = tutorialCodeRepository;
+        this.algorithmCodeRepository = algorithmCodeRepository;
+    }
 
     /**
      * 获取用户保存的代码

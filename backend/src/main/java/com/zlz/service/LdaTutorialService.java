@@ -1,6 +1,6 @@
 package com.zlz.service;
 
-import com.zlz.Dao.LdaTutorialRepository;
+import com.zlz.dao.LdaTutorialRepository;
 import com.zlz.pojo.LdaTutorialProgress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,8 +14,11 @@ import java.util.Map;
 @Service
 public class LdaTutorialService {
 
-    @Autowired
-    private LdaTutorialRepository ldaTutorialRepository;
+    private final LdaTutorialRepository ldaTutorialRepository;
+
+    public LdaTutorialService(LdaTutorialRepository ldaTutorialRepository) {
+        this.ldaTutorialRepository = ldaTutorialRepository;
+    }
 
     /**
      * 获取用户的LDA教程学习进度

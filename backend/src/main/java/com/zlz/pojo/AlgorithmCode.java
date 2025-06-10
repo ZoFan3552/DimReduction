@@ -1,8 +1,13 @@
 package com.zlz.pojo;
 
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "algorithm_code")
 public class AlgorithmCode {
@@ -25,41 +30,4 @@ public class AlgorithmCode {
 
     // Getters and Setters
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public String getLdaCode() {
-        return ldaCode;
-    }
-
-    public void setLdaCode(String ldaCode) {
-        this.ldaCode = ldaCode;
-    }
-    public String getPcaCode() {
-        return pcaCode;
-    }
-
-    public void setPcaCode(String pcaCode) {
-        this.pcaCode = pcaCode;
-    }
-
-    public String getTsneCode() {
-        return tsneCode;
-    }
-
-    public void setTsneCode(String tsneCode) {
-        this.tsneCode = tsneCode;
-    }
-
-    public String getUmapCode() {
-        return umapCode;
-    }
-
-    public void setUmapCode(String umapCode) {
-        this.umapCode = umapCode;
-    }
 }
