@@ -56,7 +56,7 @@ import DatasetDisplay from '@/components/mainComponents/graphicsComponents/multi
 import FlowChart from '@/components/mainComponents/graphicsComponents/FlowChart.vue'
 import OperationBoard from "@/components/mainComponents/graphicsComponents/multipleDisplay/OperationBoard.vue";
 import NodeDetailDisplay from "@/components/mainComponents/graphicsComponents/multipleDisplay/NodeDetailDisplay.vue";
-import axios from '@/utils/myAxios.js'; // 导入axios用于HTTP请求
+import axios from '@/utils/backendAxios.js'; // 导入axios用于HTTP请求
 
 export default {
     components: {

@@ -111,7 +111,7 @@
 </template>
 
 <script>
-import axios from '@/utils/flaskAxios';
+import axios from '@/utils/calculatorAxios';
 import 'katex/dist/katex.min.css';
 import katex from 'katex';
 

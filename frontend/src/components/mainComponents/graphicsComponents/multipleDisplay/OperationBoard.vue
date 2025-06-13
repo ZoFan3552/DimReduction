@@ -45,9 +45,9 @@
 </template>
 <script>
 import PreProcessing from '@/components/basicOperations/PreProcessing.vue';
-import MatrixProcessBoard from '@/components/basicOperations/MatrixProcess/MatrixProcessBoard.vue';
+import MatrixProcessBoard from '@/components/basicOperations/matrixProcess/MatrixProcessBoard.vue';
 // import NumericalCalculationBoard from '@/components/basicOperations/NumericalCalculation/NumericalCalculationBoard.vue';
-import GradientDescentBoard from '@/components/basicOperations/GradientDescent/GradientDescentBoard.vue';
+import GradientDescentBoard from '@/components/basicOperations/gradientDescent/GradientDescentBoard.vue';
 import DataImport from '@/components/basicOperations/dataImport/DataImport.vue';
 import LowDimGenerator from '@/components/basicOperations/lowDimSpaceGenerator/LowDimGenerator.vue';
 import EigenvalueCalculation from '@/components/basicOperations/eigenvalueCalcu/EigenvalueCalculation.vue';

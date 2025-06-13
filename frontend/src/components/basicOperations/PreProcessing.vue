@@ -187,7 +187,7 @@
 </template>
 
 <script>
-import axios from '@/utils/flaskAxios';
+import axios from '@/utils/calculatorAxios';
 
 export default {
     name: 'SimpleDataPreprocessing',

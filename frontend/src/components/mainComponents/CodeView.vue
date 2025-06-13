@@ -89,7 +89,7 @@ import 'codemirror/mode/python/python'
 import 'codemirror/addon/edit/closebrackets'
 import 'codemirror/addon/edit/matchbrackets'
 import 'codemirror/addon/selection/active-line'
-import axios from '@/utils/myAxios'
+import axios from '@/utils/backendAxios'
 
 export default {
     name: 'DimReductionEditor',

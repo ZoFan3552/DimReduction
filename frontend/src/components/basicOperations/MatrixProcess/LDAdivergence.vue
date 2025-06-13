@@ -127,7 +127,7 @@
 <script>
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
-import axios from '@/utils/flaskAxios';
+import axios from '@/utils/calculatorAxios';
 
 export default {
     name: 'LDAMatrixCalculator',

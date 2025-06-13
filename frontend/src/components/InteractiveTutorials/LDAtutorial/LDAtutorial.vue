@@ -37,7 +37,7 @@ import ApplicationsOfLDA from './lessons/LDAapplication.vue'
 // import LDALimitations from './lessons/LDALimitations.vue'
 // import AdvancedLDATopics from './lessons/AdvancedLDATopics.vue'
 // import FinalQuiz from './lessons/FinalQuiz.vue'
-import axios from '@/utils/myAxios';
+import axios from '@/utils/backendAxios';
 
 export default {
     name: 'LdaTutorial',

@@ -187,7 +187,7 @@
 </template>
 
 <script>
-import axios from '@/utils/flaskAxios';
+import axios from '@/utils/calculatorAxios';
 import * as echarts from 'echarts';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
